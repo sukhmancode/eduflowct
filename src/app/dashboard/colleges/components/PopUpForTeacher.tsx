@@ -1,81 +1,83 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import "../styles/popup.scss";
 
 interface Props {
   tid: number;
   onclick: () => any;
 }
+
 interface Data {
   Tcontact: number;
   Temail: string;
   Tname: string;
   id: number;
 }
+
 export default function PopUpForTeacher({ tid, onclick }: Props) {
   const [collegeName, setCollegeName] = useState<string>();
-  const [collegeid, setCollegeId] = useState<string | null>();
-  const [detail, setDetails] = useState<Data>();
+  const [collegeId, setCollegeId] = useState<string | null>();
+  const [detail, setDetail] = useState<Data | null>(null);
 
-  const getTdetails = (collegeid: string) => {
-    const url1 = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/search_teacher/${tid}?College_id=${collegeid}`;
-    const url = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/details`;
+  const getTdetails = (collegeId: string) => {
+    const teacherUrl = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeId}/search_teacher/${tid}?College_id=${collegeId}`;
+    const collegeUrl = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeId}/details`;
+
     axios
-      .get(url)
-      .then(({ data }) => {
-        console.log(data);
-        setCollegeName(data.Colname);
-      })
-      .catch(() => {
-        console.log("error");
-      });
+      .get(collegeUrl)
+      .then(({ data }) => setCollegeName(data.Colname))
+      .catch(() => console.log("College fetch error"));
+
     axios
-      .get(url1)
-      .then(({ data }) => {
-        setDetails(data[0]);
-      })
-      .catch(() => {
-        console.log("error");
-      });
+      .get(teacherUrl)
+      .then(({ data }) => setDetail(data[0]))
+      .catch(() => console.log("Teacher fetch error"));
   };
+
   useEffect(() => {
-    const collegeId = sessionStorage.getItem("collegeId");
-    setCollegeId(collegeId);
-    if (collegeId) {
-      getTdetails(collegeId);
-    }
+    const storedId = sessionStorage.getItem("collegeId");
+    setCollegeId(storedId);
+    if (storedId) getTdetails(storedId);
   }, []);
-  console.log(detail);
+
   return (
-    <>
-      <div className="popup-container">
-        <div className="popup-content-container">
-          {detail ? (
-            <>
-              <p className="heading">
-                Teacher Id: <span className="teacher-detail">{detail.id}</span>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+        {detail ? (
+          <>
+            <h2 className="text-xl font-bold text-center mb-4">
+              Teacher Details
+            </h2>
+
+            <div className="space-y-3 text-gray-700">
+              <p>
+                <span className="font-medium text-gray-500">Teacher ID:</span>{" "}
+                {detail.id}
               </p>
-              <p className="heading">
-                Teacher Name:{" "}
-                <span className="teacher-detail">{detail.Tname}</span>
+              <p>
+                <span className="font-medium text-gray-500">Name:</span>{" "}
+                {detail.Tname}
               </p>
-              <p className="heading">
-                Teacher Contact:{" "}
-                <span className="teacher-detail">{detail.Tcontact}</span>
+              <p>
+                <span className="font-medium text-gray-500">Contact:</span>{" "}
+                {detail.Tcontact}
               </p>
-              <p className="heading">
-                Teacher Email:{" "}
-                <span className="teacher-detail">{detail.Temail}</span>
+              <p>
+                <span className="font-medium text-gray-500">Email:</span>{" "}
+                {detail.Temail}
               </p>
-            </>
-          ) : (
-            ""
-          )}
-          <button className="view-details" onClick={onclick}>
-            Done
-          </button>
-        </div>
+            </div>
+
+            <button
+              onClick={onclick}
+              className="mt-6 w-full bg-black text-white py-2 rounded-md hover:bg-neutral-800 transition"
+            >
+              Done
+            </button>
+          </>
+        ) : (
+          <p className="text-center text-gray-500">Loading teacher info...</p>
+        )}
       </div>
-    </>
+    </div>
   );
 }

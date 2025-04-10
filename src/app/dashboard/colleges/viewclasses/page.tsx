@@ -57,8 +57,10 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="view-classes-content-container md:pl-[300px]">
-            <h2 className="welcome-message"> Welcome, {collegeName}</h2>
+          <div className="view-classes-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
+            <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
+              <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
+            </div>
             <div className="flex flex-wrap p-5 gap-3">
               {classes?.map((data, index) => {
                 return (
