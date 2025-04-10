@@ -6,7 +6,7 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-import "../styles/sidebar.scss";
+
 import axios from "axios";
 import "../styles/card.scss";
 

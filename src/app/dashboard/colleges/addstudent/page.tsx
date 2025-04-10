@@ -6,7 +6,7 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-import "../styles/sidebar.scss";
+
 import "../styles/addteacher.scss";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -171,8 +171,8 @@ export default function page() {
                     />
                   </div>
                   <Button type="submit" disabled={loading} className="w-full ">
-                  {loading ? "Adding..." : "Add Student"}
-                </Button>
+                    {loading ? "Adding..." : "Add Student"}
+                  </Button>
                 </form>
               </div>
             </div>

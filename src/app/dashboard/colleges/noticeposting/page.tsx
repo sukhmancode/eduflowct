@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-import "../styles/sidebar.scss";
 
 export default function PostNotice() {
   const router = useRouter();
@@ -40,7 +39,6 @@ export default function PostNotice() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-   
       setImage(file);
     } else {
       toast.error("Please select an image!");
@@ -84,7 +82,6 @@ export default function PostNotice() {
       setTitle("");
       setDescription("");
       setImage(null);
-
     } catch (error) {
       toast.error("Error posting notice.");
       console.error("Post error:", error);

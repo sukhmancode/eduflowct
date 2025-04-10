@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-import "../styles/sidebar.scss";
+
 import "../styles/addteacher.scss";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,9 @@ export default function Page() {
 
     if (storedCollegeId) {
       axios
-        .get(`https://ai-teacher-api-xnd1.onrender.com/college/${storedCollegeId}/details`)
+        .get(
+          `https://ai-teacher-api-xnd1.onrender.com/college/${storedCollegeId}/details`
+        )
         .then(({ data }) => setCollegeName(data.Colname))
         .catch(() => console.log("Error fetching college details"));
     }
@@ -100,30 +102,64 @@ export default function Page() {
               <form className="add-teacher-form" onSubmit={handleFormSubmit}>
                 <div className="input-wrapper">
                   <label htmlFor="tid">Teacher ID:</label>
-                  <input type="number" id="tid" ref={idRef} className="bg-secondary" required />
+                  <input
+                    type="number"
+                    id="tid"
+                    ref={idRef}
+                    className="bg-secondary"
+                    required
+                  />
                 </div>
 
                 <div className="input-wrapper">
                   <label htmlFor="tname">Teacher Name:</label>
-                  <input type="text" id="tname" ref={nameRef} className="bg-secondary" required />
+                  <input
+                    type="text"
+                    id="tname"
+                    ref={nameRef}
+                    className="bg-secondary"
+                    required
+                  />
                 </div>
 
                 <div className="input-wrapper">
                   <label htmlFor="temail">Teacher Email:</label>
-                  <input type="email" id="temail" ref={emailRef} className="bg-secondary" required />
+                  <input
+                    type="email"
+                    id="temail"
+                    ref={emailRef}
+                    className="bg-secondary"
+                    required
+                  />
                 </div>
 
                 <div className="input-wrapper">
                   <label htmlFor="tphone">Teacher Contact:</label>
-                  <input type="text" id="tphone" ref={phoneRef} className="bg-secondary" required />
+                  <input
+                    type="text"
+                    id="tphone"
+                    ref={phoneRef}
+                    className="bg-secondary"
+                    required
+                  />
                 </div>
 
                 <div className="input-wrapper">
                   <label htmlFor="tpass">Teacher Password:</label>
-                  <input type="password" id="tpass" ref={passRef} className="bg-secondary" required />
+                  <input
+                    type="password"
+                    id="tpass"
+                    ref={passRef}
+                    className="bg-secondary"
+                    required
+                  />
                 </div>
 
-                <Button type="submit" disabled={loading} className="w-full mt-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-4"
+                >
                   {loading ? "Adding..." : "Add Teacher"}
                 </Button>
               </form>
