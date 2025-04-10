@@ -6,7 +6,6 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-
 import axios from "axios";
 import "../styles/card.scss";
 
@@ -58,7 +57,7 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="view-classes-content-container">
+          <div className="view-classes-content-container md:pl-[300px]">
             <h2 className="welcome-message"> Welcome, {collegeName}</h2>
             <div className="flex flex-wrap p-5 gap-3">
               {classes?.map((data, index) => {

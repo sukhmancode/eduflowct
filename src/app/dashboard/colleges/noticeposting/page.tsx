@@ -101,7 +101,7 @@ export default function PostNotice() {
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="flex justify-center items-center self-center">
+        <div className="flex justify-center items-center self-center md:pl-[300px]">
           <Card className="w-full md:w-[500px] shadow-2xl border border-gray-200 p-6 mt-5">
             <CardHeader />
             <h1 className="text-center font-semibold text-3xl mb-4">

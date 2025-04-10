@@ -94,7 +94,7 @@ export default function Page() {
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="add-teacher-content-container">
+        <div className="add-teacher-content-container md:pl-[300px]">
           <h2 className="welcome-message">Welcome, {collegeName}</h2>
           <div className="flex justify-center">
             <div className="add-teacher-form-container flex bg-muted/40">

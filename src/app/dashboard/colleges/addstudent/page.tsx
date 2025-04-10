@@ -6,7 +6,6 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-
 import "../styles/addteacher.scss";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -105,7 +104,7 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="add-teacher-content-container">
+          <div className="add-teacher-content-container md:pl-[300px]">
             <h2 className="welcome-message"> Welcome, {collegeName}</h2>
             <div className="flex justify-center">
               <div className="add-teacher-form-container flex  bg-muted/40">

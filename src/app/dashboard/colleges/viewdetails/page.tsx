@@ -53,7 +53,7 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="view-details-content-container">
+          <div className="view-details-content-container md:pl-[300px]">
             <h2 className="welcome-message"> Welcome, {collegeName}</h2>
             <div className="flex flex-wrap p-5 gap-3  details-content">
               {detail ? (
