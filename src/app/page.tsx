@@ -3,11 +3,15 @@ import Image from "next/image";
 import { ChevronRight, GraduationCap } from "lucide-react";
 import { BackgroundPaths } from "./components/hero";
 import { LoginDialog } from "./components/LoginPopup";
+import { HeroScrollVideo } from "./components/VideoP";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="sticky p-2 top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div
+      className="flex flex-col min-h-screen"
+      style={{ boxSizing: "border-box" }}
+    >
+      <header className="sticky p-2 top-0 z-50 w-full flex justify-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-6 w-6" />
@@ -16,39 +20,48 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link
               href="#features"
-              className="font-medium transition-colors hover:text-primary"
+              className="text-[18px] transition-colors hover:text-primary"
             >
               Features
             </Link>
             <Link
               href="#how-it-works"
-              className="font-medium transition-colors hover:text-primary"
+              className="text-[18px] transition-colors hover:text-primary"
             >
               How It Works
             </Link>
             <Link
               href="#benefits"
-              className="font-medium transition-colors hover:text-primary"
+              className="text-[18px] transition-colors hover:text-primary"
             >
               Benefits
             </Link>
             <Link
               href="#faq"
-              className="font-medium transition-colors hover:text-primary"
+              className="text-[18px] transition-colors hover:text-primary"
             >
               FAQ
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <LoginDialog buttonLabel="Log in" buttonClassName="" />
+            <LoginDialog buttonLabel="Log in" buttonClassName="text-[15px]" />
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
         <BackgroundPaths />
-
+        <div className="w-full p-[10px] mt-[10px] mb-[20px] flex flex-col items-center">
+          <h1
+            className="text-transparent bg-clip-text 
+                    bg-gradient-to-r from-neutral-900 to-neutral-700/80 
+                    dark:from-white dark:to-white/80 text-4xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-[5px] "
+            style={{ textAlign: "center" }}
+          >
+            EDUFLOW
+          </h1>
+          <HeroScrollVideo />
+        </div>
         {/* How It Works Section */}
         <section
           id="how-it-works"
@@ -60,7 +73,7 @@ export default function LandingPage() {
                 <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
                   How It Works
                 </div>
-                <h2 className="text-3 xl font-bold tracking-tighter sm:text-5xl">
+                <h2 className="text-3 xl font-bold tracking-[2px] sm:text-5xl ">
                   Simple Process, Powerful Results
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -75,7 +88,7 @@ export default function LandingPage() {
                   1
                 </div>
                 <h3 className="text-xl font-bold">Create Your Profile</h3>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground tracking-[2px]">
                   Sign up and set up your student profile with basic
                   information.
                 </p>
@@ -113,7 +126,7 @@ export default function LandingPage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
               <div className="flex items-center justify-center">
                 <Image
-                  src="/dashboard.png"
+                  src="/dashboard-image.jpg"
                   alt="Students using the platform"
                   width={750}
                   height={750}
@@ -125,7 +138,10 @@ export default function LandingPage() {
                   <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
                     Benefits
                   </div>
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+                  <h2
+                    className="text-3xl font-bold tracking-tighter sm:text-4xl tracking-[2px]"
+                    style={{ letterSpacing: 2 }}
+                  >
                     Why Choose EduFlow?
                   </h2>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
@@ -200,7 +216,10 @@ export default function LandingPage() {
                 <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
                   Students of GNDEC
                 </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                <h2
+                  className="text-3xl font-bold tracking-tighter sm:text-5xl tracking-[2px]"
+                  style={{ letterSpacing: 2 }}
+                >
                   What Students Say
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -259,7 +278,10 @@ export default function LandingPage() {
                 <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
                   FAQ
                 </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                <h2
+                  className="text-3xl font-bold tracking-tighter sm:text-5xl"
+                  style={{ letterSpacing: 2 }}
+                >
                   Frequently Asked Questions
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
