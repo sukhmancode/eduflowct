@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Submission {
   sub_id: number;
@@ -30,15 +36,24 @@ interface Language {
 
 export default function Submissions() {
   const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState<string>(""); // ✅
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [feedbackState, setFeedbackState] = useState<{ [sub_id: number]: string }>({});
-  const [originalFeedback, setOriginalFeedback] = useState<{ [sub_id: number]: string }>({});
+  const [feedbackState, setFeedbackState] = useState<{
+    [sub_id: number]: string;
+  }>({});
+  const [originalFeedback, setOriginalFeedback] = useState<{
+    [sub_id: number]: string;
+  }>({});
   const [visible, setVisible] = useState<{ [sub_id: number]: boolean }>({});
   const [typing, setTyping] = useState<number | null>(null);
-  const [translating, setTranslating] = useState<{ [sub_id: number]: boolean }>({});
-  const [selectedLanguage, setSelectedLanguage] = useState<{ [sub_id: number]: string }>({});
+  const [translating, setTranslating] = useState<{ [sub_id: number]: boolean }>(
+    {}
+  );
+  const [selectedLanguage, setSelectedLanguage] = useState<{
+    [sub_id: number]: string;
+  }>({});
 
   const languages: Language[] = [
     { code: "en", name: "English" },
@@ -60,12 +75,20 @@ export default function Submissions() {
 
     const fetchData = async () => {
       try {
-        const [subsRes, assignRes] = await Promise.all([
-          axios.get(`https://ai-teacher-api-xnd1.onrender.com/student/submissions/${id}`),
-          axios.get(`https://ai-teacher-api-xnd1.onrender.com/student/assignments/${id}`),
+        const [subsRes, assignRes, detailRes] = await Promise.all([
+          axios.get(
+            `https://ai-teacher-api-xnd1.onrender.com/student/submissions/${id}`
+          ),
+          axios.get(
+            `https://ai-teacher-api-xnd1.onrender.com/student/assignments/${id}`
+          ),
+          axios.get(
+            `https://ai-teacher-api-xnd1.onrender.com/student/${id}/details`
+          ),
         ]);
         setSubmissions(subsRes.data);
         setAssignments(assignRes.data);
+        setStudentName(detailRes.data.Sname); // ✅ set name
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -97,10 +120,7 @@ export default function Submissions() {
     if (!studentId) return;
 
     if (feedbackState[sub_id]) {
-      setVisible((prev) => ({
-        ...prev,
-        [sub_id]: !prev[sub_id],
-      }));
+      setVisible((prev) => ({ ...prev, [sub_id]: !prev[sub_id] }));
       return;
     }
 
@@ -116,10 +136,9 @@ export default function Submissions() {
         finalFeedback = data.FeedBack || "No feedback available.";
       }
 
-      // Store the original English feedback
       setOriginalFeedback((prev) => ({
         ...prev,
-        [sub_id]: finalFeedback as string,
+        [sub_id]: finalFeedback,
       }));
 
       setFeedbackState((prev) => ({
@@ -132,221 +151,178 @@ export default function Submissions() {
         [sub_id]: true,
       }));
 
-      // Set Hindi as default language for this submission
       setSelectedLanguage((prev) => ({
         ...prev,
         [sub_id]: "hi",
       }));
 
-      // Translate to Hindi by default
-      translateFeedback(sub_id, finalFeedback as string, "hi");
+      translateFeedback(sub_id, finalFeedback, "hi");
     } catch (err) {
-      console.error("Error fetching/generating feedback", err);
+      console.error("Error fetching feedback", err);
       setTyping(null);
     }
   };
 
-  const translateFeedback = async (sub_id: number, text: string, targetLang: string) => {
+  const translateFeedback = async (
+    sub_id: number,
+    text: string,
+    targetLang: string
+  ) => {
     if (!text) return;
-    
-    setTranslating((prev) => ({
-      ...prev,
-      [sub_id]: true,
-    }));
+
+    setTranslating((prev) => ({ ...prev, [sub_id]: true }));
 
     try {
-      // If user selects English, just use the original feedback
       if (targetLang === "en") {
-        setFeedbackState((prev) => ({
-          ...prev,
-          [sub_id]: "",
-        }));
+        setFeedbackState((prev) => ({ ...prev, [sub_id]: "" }));
         typeFeedback(sub_id, originalFeedback[sub_id]);
-        setSelectedLanguage((prev) => ({
-          ...prev,
-          [sub_id]: "en",
-        }));
+        setSelectedLanguage((prev) => ({ ...prev, [sub_id]: "en" }));
         return;
       }
 
-      // In a real application, you would call a translation API here
-      // For now, let's simulate translation with a simple mock
-      const mockTranslatedText = await mockTranslate(text, targetLang);
-      
-      setFeedbackState((prev) => ({
-        ...prev,
-        [sub_id]: "",
-      }));
-
-      typeFeedback(sub_id, mockTranslatedText);
-      setSelectedLanguage((prev) => ({
-        ...prev,
-        [sub_id]: targetLang,
-      }));
+      const mockTranslated = await mockTranslate(text, targetLang);
+      setFeedbackState((prev) => ({ ...prev, [sub_id]: "" }));
+      typeFeedback(sub_id, mockTranslated);
+      setSelectedLanguage((prev) => ({ ...prev, [sub_id]: targetLang }));
     } catch (err) {
       console.error("Translation error", err);
-      // Fallback to original text if translation fails
-      typeFeedback(sub_id, originalFeedback[sub_id]);
     } finally {
-      setTranslating((prev) => ({
-        ...prev,
-        [sub_id]: false,
-      }));
+      setTranslating((prev) => ({ ...prev, [sub_id]: false }));
     }
   };
 
-  // Mock translation function (in production, replace with actual API call)
-  const mockTranslate = async (text: string, targetLang: string): Promise<string> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // In a real app, you would use something like Google Translate API or DeepL
-    // For example:
-    // const response = await axios.post('https://translation-api.com/translate', {
-    //   text,
-    //   target: targetLang
-    // });
-    // return response.data.translatedText;
-
-    // Simple mock translations for demonstration
-    const mockTranslations: {[key: string]: {[key: string]: string}} = {
-      "hi": {
-        "No feedback available.": "कोई प्रतिक्रिया उपलब्ध नहीं है।",
-        "Great job!": "बहुत अच्छा काम!",
-      },
-      "pa": {
-        "No feedback available.": "ਕੋਈ ਫੀਡਬੈਕ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",
-        "Great job!": "ਬਹੁਤ ਵਧੀਆ ਕੰਮ!",
-      },
-      "bn": {
-        "No feedback available.": "কোন প্রতিক্রিয়া উপলব্ধ নেই।",
-        "Great job!": "চমৎকার কাজ!",
-      }
-    };
-
-    // For demonstration, we just return a prefix based on the language
-    // In a real app, you would return the actual translated text
-    return `[${languages.find(l => l.code === targetLang)?.name}] ${text}`;
+  const mockTranslate = async (text: string, lang: string): Promise<string> => {
+    await new Promise((res) => setTimeout(res, 500));
+    return `[${languages.find((l) => l.code === lang)?.name}] ${text}`;
   };
 
   const getAssignmentTitle = (assignmentId: number) => {
-    const assignment = assignments.find((a) => a.id === assignmentId);
-    return assignment ? assignment.title : `Assignment ${assignmentId}`;
+    return (
+      assignments.find((a) => a.id === assignmentId)?.title ||
+      `Assignment ${assignmentId}`
+    );
   };
 
-  if (loading) {
+  if (loading)
     return <p className="text-center text-gray-500">Loading submissions...</p>;
-  }
-
-  if (!submissions.length) {
+  if (!submissions.length)
     return <p className="text-center text-gray-500">No submissions found.</p>;
-  }
 
   return (
-    <div className="flex flex-wrap justify-center mt-8">
-      <div className="w-full max-w-4xl space-y-4">
-        {submissions.map((submission) => (
-          <Card key={submission.sub_id} className="border border-gray-200 shadow-sm">
+    <div className="flex flex-wrap justify-center mt-8 px-4">
+      <div className="w-full  space-y-6">
+        {/* ✅ Welcome Card */}
+        {studentName && (
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
             <CardHeader>
-              <CardTitle>Assignment: {getAssignmentTitle(submission.assignment_id)}</CardTitle>
+              <CardTitle className="text-2xl">Welcome, {studentName}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p>
-                <strong>Submitted At:</strong>{" "}
-                {new Date(submission.submitted_at).toLocaleString()}
+            <CardContent>
+              <p className="text-gray-300">
+                Here are all your assignment submissions.
               </p>
-              <p>
-                <strong>File:</strong>{" "}
-                <a
-                  href={submission.cloudinary_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline"
+            </CardContent>
+          </Card>
+        )}
+        <div className="flex flex-wrap gap-[10px]">
+          {/* ✅ Submissions */}
+          {submissions.map((submission) => (
+            <Card
+              key={submission.sub_id}
+              className="border border-gray-800 bg-[#1e293b] text-white shadow-lg max-w-[400px]"
+            >
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  Assignment: {getAssignmentTitle(submission.assignment_id)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p>
+                  <strong>Submitted At:</strong>{" "}
+                  {new Date(submission.submitted_at).toLocaleString()}
+                </p>
+                <p>
+                  <strong>File:</strong>{" "}
+                  <a
+                    href={submission.cloudinary_url}
+                    target="_blank"
+                    className="text-blue-400 underline"
+                  >
+                    View PDF
+                  </a>
+                </p>
+
+                <Button
+                  onClick={() => getOrGenerateFeedback(submission)}
+                  disabled={typing === submission.sub_id}
+                  className="bg-white text-black hover:bg-gray-300 transition"
                 >
-                  View PDF
-                </a>
-              </p>
+                  {typing === submission.sub_id
+                    ? "Typing..."
+                    : visible[submission.sub_id]
+                    ? "Hide Feedback"
+                    : "View Feedback"}
+                </Button>
 
-              <Button
-                onClick={() => getOrGenerateFeedback(submission)}
-                disabled={typing === submission.sub_id}
-              >
-                {typing === submission.sub_id
-                  ? "Typing..."
-                  : visible[submission.sub_id]
-                  ? "Hide Feedback"
-                  : "View Feedback"}
-              </Button>
-
-              {visible[submission.sub_id] && (
-                <div className="mt-2 p-3 border rounded">
-                  <div className="flex justify-between items-center mb-4">
-                    <p>
-                      <strong className="text-2xl">Grade:</strong>{" "}
-                      {submission.grade ?? "N/A"}
-                    </p>
-                    
-                    {/* Language selector */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Language:</span>
-                      <Select
-                        value={selectedLanguage[submission.sub_id] || "en"}
-                        onValueChange={(value) => {
-                          if (originalFeedback[submission.sub_id]) {
+                {visible[submission.sub_id] && (
+                  <div className="bg-gray-100 text-black rounded-md p-4 mt-2">
+                    <div className="flex justify-between items-center mb-4">
+                      <p>
+                        <strong className="text-xl">Grade:</strong>{" "}
+                        {submission.grade ?? "N/A"}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600">Language:</span>
+                        <Select
+                          value={selectedLanguage[submission.sub_id] || "en"}
+                          onValueChange={(value) =>
                             translateFeedback(
                               submission.sub_id,
                               originalFeedback[submission.sub_id],
                               value
-                            );
+                            )
                           }
-                        }}
-                        disabled={translating[submission.sub_id]}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue placeholder="Select language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {languages.map((lang) => (
-                            <SelectItem key={lang.code} value={lang.code}>
-                              {lang.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          disabled={translating[submission.sub_id]}
+                        >
+                          <SelectTrigger className="w-32 bg-white text-black rounded-md">
+                            <SelectValue placeholder="Language" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white text-black">
+                            {languages.map((lang) => (
+                              <SelectItem key={lang.code} value={lang.code}>
+                                {lang.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <p>
-                      <strong className="text-2xl">Feedback:</strong>{" "}
+
+                    <div className="overflow-auto max-h-[200px]">
+                      <strong className="text-xl">
+                        Feedback:
+                        <br />
+                      </strong>{" "}
                       {translating[submission.sub_id] ? (
                         <span className="italic text-gray-500">
                           Translating...
                         </span>
                       ) : (
-                        <span className="whitespace-pre-line">
-                          {feedbackState[submission.sub_id] ? (
-                            <>
-                              {feedbackState[submission.sub_id]}
-                              {feedbackState[submission.sub_id]?.length <
-                                (originalFeedback[submission.sub_id]?.length || 0) && (
-                                <span className="animate-pulse">|</span>
-                              )}
-                            </>
-                          ) : (
+                        <span className="whitespace-pre-line text-base">
+                          {feedbackState[submission.sub_id] || (
                             <span className="italic text-gray-500 animate-pulse">
                               typing...
                             </span>
                           )}
                         </span>
                       )}
-                    </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -26,7 +26,7 @@ export default function StudentAssignments() {
   const router = useRouter();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [studentId, setStudentId] = useState<string | null>(null);
-  const [studentName, setStudentName] = useState<string>(""); // ✅ NEW STATE
+  const [studentName, setStudentName] = useState<string>("");
   const [files, setFiles] = useState<{ [id: number]: File | null }>({});
   const [status, setStatus] = useState<{ [id: number]: string | null }>({});
   const [feedbacks, setFeedbacks] = useState<{ [subm_id: number]: Feedback }>(
@@ -39,28 +39,22 @@ export default function StudentAssignments() {
     [ass_id: number]: number;
   }>({});
 
-  // ✅ Fetch assignments + student name
   useEffect(() => {
     const id = sessionStorage.getItem("studentId");
     if (!id) return router.push("/");
     setStudentId(id);
 
-    // Fetch assignments
     axios
       .get(`https://ai-teacher-api-xnd1.onrender.com/student/assignments/${id}`)
       .then(({ data }) => setAssignments(data))
       .catch(() => setStatus({ 0: "Error fetching assignments." }));
 
-    // Fetch student details
     axios
       .get(`https://ai-teacher-api-xnd1.onrender.com/student/${id}/details`)
-      .then(({ data }) => {
-        setStudentName(data.Sname); // ✅ set student name
-      })
+      .then(({ data }) => setStudentName(data.Sname))
       .catch(() => console.error("Error fetching student details"));
   }, [router]);
 
-  // Get all submissions to map assignment_id to subm_id
   useEffect(() => {
     if (!studentId) return;
 
@@ -164,7 +158,6 @@ export default function StudentAssignments() {
   return (
     <div className="flex justify-center items-center px-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-screen-xl">
-        {/* ✅ WELCOME CARD */}
         {studentName && (
           <Card className="col-span-full shadow-lg border border-gray-800 bg-[#1e293b] text-white">
             <CardHeader>
@@ -173,7 +166,6 @@ export default function StudentAssignments() {
           </Card>
         )}
 
-        {/* ✅ ASSIGNMENT CARDS */}
         {assignments.map((assignment) => {
           const isSubmitted =
             assignment.is_submitted || submittedMap[assignment.id];
@@ -204,7 +196,7 @@ export default function StudentAssignments() {
                     href={assignment.cloudinary_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-300 underline"
+                    className="text-blue-400 underline"
                   >
                     View
                   </a>
@@ -220,10 +212,12 @@ export default function StudentAssignments() {
                           e.target.files?.[0] || null
                         )
                       }
+                      className="bg-white text-black"
                     />
                     <Button
                       onClick={() => handleSubmit(assignment.id)}
                       disabled={status[assignment.id] === "Submitting..."}
+                      className="bg-gray-700 hover:bg-gray-600 text-white"
                     >
                       {status[assignment.id] === "Submitting..."
                         ? "Submitting..."
@@ -237,24 +231,31 @@ export default function StudentAssignments() {
                 )}
 
                 {status[assignment.id] && (
-                  <p className="text-blue-400">{status[assignment.id]}</p>
+                  <p
+                    className={`${
+                      status[assignment.id]?.includes("success")
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {status[assignment.id]}
+                  </p>
                 )}
 
                 <>
                   <div className="flex gap-4">
                     <Button
-                      variant="outline"
-                      className="mt-2 text-white border-white"
+                      className="mt-2 bg-gray-800 hover:bg-gray-700 text-white"
                       onClick={() => {
                         toggleFeedback(assignment.id);
                         router.push("/dashboard/student/submissions");
                       }}
                     >
-                      {"View Feedback"}
+                      View Feedback
                     </Button>
                   </div>
                   {feedbackVisible[assignment.id] && feedback && (
-                    <div className="bg-gray-100 text-black p-2 border rounded mt-2">
+                    <div className="bg-white text-black p-2 border rounded mt-2">
                       <p>
                         <strong>Grade:</strong>{" "}
                         {feedback.grade !== null
