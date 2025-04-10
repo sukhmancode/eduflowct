@@ -5,25 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, PlusCircle } from "lucide-react";
+
 function getGradePoint(marks: number): number {
-    const gradeTable = [
-      { min: 90, point: 10 },
-      { min: 80, point: 9 },
-      { min: 70, point: 8 },
-      { min: 60, point: 7 },
-      { min: 50, point: 6 },
-      { min: 40, point: 5 },
-      { min: 0, point: 0 },
-    ];
-  
-    for (const entry of gradeTable) {
-      if (marks >= entry.min) {
-        return entry.point;
-      }
-    }
-    return 0;
-  }
-  
+  if (marks >= 90) return 10;
+  if (marks >= 80) return 9;
+  if (marks >= 70) return 8;
+  if (marks >= 60) return 7;
+  if (marks >= 50) return 6;
+  if (marks >= 40) return 5;
+  return 0;
+}
 
 interface Subject {
   id: number;
@@ -38,7 +29,9 @@ export default function SgpaCalculator() {
   const [sgpa, setSgpa] = useState<number | null>(null);
 
   const handleChange = (id: number, field: keyof Subject, value: number) => {
-    if (field === "marks") value = Math.min(value, 100); // clamp max to 100
+    if (field === "marks") value = Math.min(Math.max(0, value), 100);
+    if (field === "credit") value = Math.max(0, value);
+
     setSubjects((prev) =>
       prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
     );
@@ -46,20 +39,29 @@ export default function SgpaCalculator() {
 
   const addSubject = () => {
     const newId = subjects.length ? subjects[subjects.length - 1].id + 1 : 1;
-    setSubjects([...subjects, { id: newId, credit: 0, marks: 0 }]);
+    setSubjects([...subjects, { id: newId, credit: 3, marks: 0 }]);
   };
 
   const removeSubject = (id: number) => {
-    setSubjects(subjects.filter((s) => s.id !== id));
+    if (subjects.length > 1) {
+      setSubjects(subjects.filter((s) => s.id !== id));
+    }
   };
 
   const calculateSGPA = () => {
     const totalCredits = subjects.reduce((sum, s) => sum + s.credit, 0);
+
+    if (totalCredits === 0) {
+      setSgpa(0);
+      return;
+    }
+
     const weightedSum = subjects.reduce(
       (sum, s) => sum + s.credit * getGradePoint(s.marks),
       0
     );
-    const sgpaResult = totalCredits === 0 ? 0 : weightedSum / totalCredits;
+
+    const sgpaResult = weightedSum / totalCredits;
     setSgpa(parseFloat(sgpaResult.toFixed(2)));
   };
 
@@ -91,10 +93,14 @@ export default function SgpaCalculator() {
                   handleChange(subject.id, "marks", +e.target.value)
                 }
               />
+              <span className="text-sm text-gray-600">
+                Grade: {getGradePoint(subject.marks)}
+              </span>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => removeSubject(subject.id)}
+                disabled={subjects.length <= 1}
               >
                 <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
@@ -107,7 +113,7 @@ export default function SgpaCalculator() {
             Calculate SGPA
           </Button>
           {sgpa !== null && (
-            <div className="text-center text-lg font-semibold">
+            <div className="text-center text-lg font-semibold mt-4 p-4 bg-blue-50 rounded-md">
               SGPA: <span className="text-blue-600">{sgpa}</span>
             </div>
           )}

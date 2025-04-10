@@ -11,6 +11,7 @@ import {
   Bot,
   MessageCircle,
   FileIcon,
+  FileQuestion,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -67,6 +68,12 @@ export const studentLinks: NavProps[] = [
     name: "Calculate SGPA",
     href: "/dashboard/student/sgpa",
     icon: FileIcon, // 📊 Reports Icon
+  },
+  {
+    id: 6,
+    name: "Solve Quiz",
+    href: "/dashboard/student/solvequiz",
+    icon: FileQuestion, // 📊 Reports Icon
   },
 ];
 
@@ -131,16 +138,20 @@ export const DashboardLinks = ({ role }: DashboardLinksProps) => {
         {role === "student" ? "Student Dashboard" : "Teacher Dashboard"}
       </h2>
       {links.map((link) => (
-        <Link
-          key={link.id}
-          href={link.href}
-          className={`${cn(
-            "text-muted-foreground hover:text-black"
-          )} flex items-center gap-3 p-2 rounded-lg transition-all  `}
-        >
-          <link.icon className="size-4" />
-          <p className="text-xl">{link.name}</p>
-        </Link>
+       <Link
+       key={link.id}
+       href={link.href}
+       className={cn(
+         "flex items-center gap-3 p-2 rounded-lg transition-all",
+         pathname === link.href
+           ? "bg-muted text-black font-semibold"
+           : "text-muted-foreground hover:text-black hover:bg-muted"
+       )}
+     >
+       <link.icon className="size-4" />
+       <p className="text-xl">{link.name}</p>
+     </Link>
+     
       ))}
     </div>
   );
