@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
+import "../../globals.css";
 
 // Import Poppins
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], 
-  display: "swap", 
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,9 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className={`${poppins.variable} antialiased`}>
-        {children}
-      </body>
+      <body className={`${poppins.variable} antialiased`}>{children}</body>
     </html>
   );
 }

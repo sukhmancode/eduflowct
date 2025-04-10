@@ -1,28 +1,13 @@
 "use client";
 import { cn } from "@/lib/utils";
-import {
-  FilePlus,
-  User,
-  FileBarChart,
-  Users,
-  GraduationCap,
-  LucideProps,
-  LayoutDashboardIcon,
-  Bot,
-  MessageCircle,
-  FileIcon,
-  FileQuestion,
-} from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
+// Define your link types and links as you did before
 interface NavProps {
   id: number;
   name: string;
   href: string;
-  icon: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
 }
 
 // Student Links
@@ -31,49 +16,41 @@ export const studentLinks: NavProps[] = [
     id: 4,
     name: "Home",
     href: "/dashboard/student",
-    icon: LayoutDashboardIcon,
   },
   {
     id: 0,
     name: "View Submissions",
     href: "/dashboard/student/submissions",
-    icon: FilePlus, // 📝 Submission Icon
   },
   {
     id: 1,
     name: "View Profile",
     href: "/dashboard/student/profile",
-    icon: User, // 👤 Profile Icon
   },
   {
     id: 2,
     name: "Reports",
     href: "/dashboard/student/reports",
-    icon: FileBarChart, // 📊 Reports Icon
   },
   {
     id: 3,
     name: "ChatBot",
     href: "/dashboard/student/chatbot",
-    icon: Bot, // 📊 Reports Icon
   },
   {
     id: 4,
     name: "View MST",
     href: "/dashboard/student/viewmst",
-    icon: FileIcon, // 📊 Reports Icon
   },
   {
     id: 5,
     name: "Calculate SGPA",
     href: "/dashboard/student/sgpa",
-    icon: FileIcon, // 📊 Reports Icon
   },
   {
     id: 6,
     name: "Solve Quiz",
     href: "/dashboard/student/solvequiz",
-    icon: FileQuestion, // 📊 Reports Icon
   },
 ];
 
@@ -83,44 +60,36 @@ export const teacherLinks: NavProps[] = [
     id: 4,
     name: "Home",
     href: "/dashboard/teacher",
-    icon: LayoutDashboardIcon,
   },
   {
     id: 0,
     name: "Upload Assignment",
     href: "/dashboard/teacher/assignments",
-    icon: FilePlus, // 📝 Assignment Upload Icon
   },
-
   {
     id: 1,
     name: "View Students",
     href: "/dashboard/teacher/students",
-    icon: Users, // 👥 Students Icon
   },
   {
     id: 2,
     name: "View Profile",
     href: "/dashboard/teacher/profile",
-    icon: GraduationCap,
   },
   {
     id: 3,
     name: "ChatBot",
     href: "/dashboard/teacher/chatbot",
-    icon: Bot, // 📊 Reports Icon
   },
   {
     id: 4,
     name: "SendEmail",
     href: "/dashboard/teacher/sendemail",
-    icon: MessageCircle, // 📊 Reports Icon
   },
   {
     id: 5,
     name: "Generate certificate",
     href: "/dashboard/teacher/addcertificate",
-    icon: MessageCircle, // 📊 Reports Icon
   },
 ];
 
@@ -134,24 +103,22 @@ export const DashboardLinks = ({ role }: DashboardLinksProps) => {
 
   return (
     <div>
-      <h2 className="text-lg font-bold mb-2">
+      <h2 className="text-lg font-bold mb-4">
         {role === "student" ? "Student Dashboard" : "Teacher Dashboard"}
       </h2>
       {links.map((link) => (
-       <Link
-       key={link.id}
-       href={link.href}
-       className={cn(
-         "flex items-center gap-3 p-2 rounded-lg transition-all",
-         pathname === link.href
-           ? "bg-muted text-black font-semibold"
-           : "text-muted-foreground hover:text-black hover:bg-muted"
-       )}
-     >
-       <link.icon className="size-4" />
-       <p className="text-xl">{link.name}</p>
-     </Link>
-     
+        <Link
+          key={link.id}
+          href={link.href}
+          className={cn(
+            "flex items-center gap-3 p-3 rounded-md transition-all",
+            pathname === link.href
+              ? "bg-muted text-primary font-semibold"
+              : "text-muted-foreground hover:text-primary hover:bg-muted"
+          )}
+        >
+          <p className="text-lg">{link.name}</p>
+        </Link>
       ))}
     </div>
   );

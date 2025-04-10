@@ -1,43 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+
+interface ChatMessage {
+  role: "user" | "bot";
+  text: string;
+}
 
 export default function Chatbot() {
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
-  const [fullResponse, setFullResponse] = useState("");
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [typing, setTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const typeText = (text: string) => {
-    let index = 0;
-    setResponse("");
-    setTyping(true);
-
-    const interval = setInterval(() => {
-      setResponse((prev) => prev + text[index]);
-      index++;
-
-      if (index >= text.length) {
-        clearInterval(interval);
-        setTyping(false);
-      }
-    }, 25); // Adjust speed (ms per character)
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
 
   const handleSend = async () => {
     if (!message.trim()) {
-      toast.error("Please enter a message.");
+      toast.error("Please type something.");
       return;
     }
 
+    const newUserMsg: ChatMessage = { role: "user", text: message };
+    setChatHistory((prev) => [...prev, newUserMsg]);
     setLoading(true);
-    setResponse("Typing...");
-    setFullResponse("");
-    setTyping(true);
+    setMessage("");
 
     try {
       const { data } = await axios.post(
@@ -47,43 +43,61 @@ export default function Chatbot() {
         }
       );
 
-      const reply = data.FeedBack || "No response from chatbot.";
-      setFullResponse(reply);
-      typeText(reply);
+      const reply = data.FeedBack || "No response from AI.";
+      const botMsg: ChatMessage = { role: "bot", text: reply };
+      setChatHistory((prev) => [...prev, botMsg]);
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to get a response from chatbot.");
-      setResponse("Oops! Something went wrong.");
+      console.error(error);
+      toast.error("Failed to get a response.");
     } finally {
       setLoading(false);
-      setMessage("");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 ">
-      <div className="w-full max-w-md p-6 rounded shadow space-y-4">
-        <h1 className="text-2xl font-semibold text-center">Student Chatbot</h1>
+    <div className="min-h-[89vh] flex flex-col bg-[#0f172a] text-white rounded-xl shadow-md overflow-hidden">
+      {/* Welcome Header */}
+      <div className="w-full bg-[#1e293b] text-white px-6 py-4 shadow">
+        <h1 className="text-2xl font-semibold">EduFlow AI Chat Assistant</h1>
+        <p className="text-sm text-gray-300">
+          Ask anything related to college life, academics, or exams.
+        </p>
+      </div>
 
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        {chatHistory.map((msg, index) => (
+          <div
+            key={index}
+            className={`max-w-[80%] px-4 py-3 rounded-2xl whitespace-pre-line break-words ${
+              msg.role === "user"
+                ? "bg-[#334155] text-white ml-auto text-right w-auto"
+                : "bg-[#334155] text-white mr-auto"
+            }`}
+          >
+            {msg.role === "user" ? "🧑‍🎓 You:" : "🤖 AI:"} {msg.text}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="bg-[#1e293b] border-t border-gray-700 px-6 py-4 flex items-center gap-4">
         <textarea
-          className="w-full border border-gray-300 p-2 rounded resize-none"
-          rows={3}
+          className="flex-1 bg-[#0f172a] border border-gray-600 rounded-md p-3 resize-none text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white"
           placeholder="Type your message..."
           value={message}
+          rows={2}
           onChange={(e) => setMessage(e.target.value)}
-          disabled={loading || typing}
+          disabled={loading}
         />
-
-        <Button onClick={handleSend} className="w-full" disabled={loading || typing}>
-          {loading || typing ? "Sending..." : "Send"}
+        <Button
+          className="bg-white text-black hover:bg-gray-300 px-6 py-2 font-semibold"
+          onClick={handleSend}
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Send"}
         </Button>
-
-        {response && (
-          <div className="mt-4 p-3 border rounded  text-secondary text-sm whitespace-pre-line min-h-[50px]">
-            {response}
-            {typing && <span className="animate-pulse ml-1">|</span>}
-          </div>
-        )}
       </div>
     </div>
   );

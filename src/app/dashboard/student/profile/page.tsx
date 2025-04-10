@@ -51,36 +51,53 @@ export default function Profile() {
   }, []);
 
   if (loading) {
-    return <div className="p-4">Loading student profile...</div>;
+    return (
+      <div className="p-4 text-center text-gray-500">
+        Loading student profile...
+      </div>
+    );
   }
 
   if (!student) {
-    return <div className="p-4">Student not found.</div>;
+    return (
+      <div className="p-4 text-center text-red-500">Student not found.</div>
+    );
   }
 
   return (
-    <div className="max-w-[500px] mx-auto p-6">
-      <Card>
+    <div className="min-h-[89vh]  bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+      {/* ✅ Full Width Welcome Card */}
+      <Card className="w-full shadow-lg border border-gray-800 bg-[#1e293b] text-white">
         <CardHeader>
-          <CardTitle className="text-2xl text-black text-center">
+          <CardTitle className="text-2xl">Welcome, {student.Sname}</CardTitle>
+          <CardDescription className="text-gray-300">
+            Here is your profile overview.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      {/* ✅ Left-aligned Profile Card */}
+      <Card className="w-full max-w-xl shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold">
             {student.Sname}
           </CardTitle>
-          <CardDescription className="text-2xl text-center">
+          <CardDescription className="text-gray-300">
             Student ID: {student.id}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+        <CardContent className="space-y-4">
           <div>
-            <strong className="text-xl">Email:</strong>{" "}
-            <span className="text-xl">{student.Semail}</span>
+            <p className="text-sm text-gray-400">📧 Email</p>
+            <p className="text-base font-medium">{student.Semail}</p>
           </div>
           <div>
-            <strong className="text-xl">Contact:</strong>{" "}
-            <span className="text-xl">{student.Scontact}</span>
+            <p className="text-sm text-gray-400">📞 Contact</p>
+            <p className="text-base font-medium">{student.Scontact}</p>
           </div>
           <div>
-            <strong className="text-xl">College ID:</strong>{" "}
-            <span className="text-xl">{student.college_id}</span>
+            <p className="text-sm text-gray-400">🏫 College ID</p>
+            <p className="text-base font-medium">{student.college_id}</p>
           </div>
         </CardContent>
       </Card>

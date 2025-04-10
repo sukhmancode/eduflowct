@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import "../styles/index.scss";
 import "../styles/addteacher.scss";
+import { CardHeader, CardTitle, CardContent, Card } from "@/components/ui/card";
 
 export default function Page() {
   const [collegeId, setCollegeId] = useState<string | null>(null);
@@ -15,6 +16,7 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(false);
   const [existingIds, setExistingIds] = useState<number[]>([]);
   const [idError, setIdError] = useState<string | null>(null);
+  const [idValue, setIdValue] = useState<string>(""); // ✅ Live value for Teacher ID input
 
   const idRef = useRef<HTMLInputElement | null>(null);
   const nameRef = useRef<HTMLInputElement | null>(null);
@@ -22,7 +24,6 @@ export default function Page() {
   const phoneRef = useRef<HTMLInputElement | null>(null);
   const passRef = useRef<HTMLInputElement | null>(null);
 
-  // Fetch college and teacher list
   useEffect(() => {
     const storedCollegeId = sessionStorage.getItem("collegeId");
     setCollegeId(storedCollegeId);
@@ -47,17 +48,24 @@ export default function Page() {
     }
   }, []);
 
-  // Validate Teacher ID
+  // ✅ Live validation
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputId = Number(e.target.value);
-    if (existingIds.includes(inputId)) {
+    const val = e.target.value;
+    setIdValue(val);
+
+    const parsed = Number(val);
+    if (!val || isNaN(parsed)) {
+      setIdError(null);
+      return;
+    }
+
+    if (existingIds.includes(parsed)) {
       setIdError("Teacher with this ID is already enrolled.");
     } else {
       setIdError(null);
     }
   };
 
-  // Form Submission
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -89,7 +97,7 @@ export default function Page() {
           toast.success("Teacher Added Successfully!");
 
           // Reset form
-          idRef.current.value = "";
+          setIdValue("");
           nameRef.current.value = "";
           emailRef.current.value = "";
           phoneRef.current.value = "";
@@ -115,21 +123,32 @@ export default function Page() {
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="add-teacher-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
-          <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
-            <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
-          </div>
+
+        <div className="add-teacher-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome, {collegeName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Register new teachers to your college below.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Add Teacher Form */}
           <div className="flex justify-center">
-            <div className="add-teacher-form-container flex bg-white rounded-xl shadow-md p-8">
-              <form
-                onSubmit={handleFormSubmit}
-                className="space-y-5 w-full max-w-md"
-              >
-                <h2 className="text-2xl font-bold mb-4">Add Teacher</h2>
+            <div className="add-teacher-form-container bg-white rounded-xl shadow-md p-8 w-full max-w-xl">
+              <form onSubmit={handleFormSubmit} className="space-y-5">
+                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+                  Register New Teacher
+                </h2>
 
                 {/* Teacher ID */}
                 <div>
@@ -142,6 +161,7 @@ export default function Page() {
                   <input
                     type="number"
                     id="tid"
+                    value={idValue}
                     ref={idRef}
                     onChange={handleIdChange}
                     className={`w-full px-4 py-2 rounded-md border ${
@@ -163,7 +183,7 @@ export default function Page() {
                     htmlFor="tname"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Teacher Name
+                    Full Name
                   </label>
                   <input
                     type="text"
@@ -181,7 +201,7 @@ export default function Page() {
                     htmlFor="temail"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Teacher Email
+                    Email
                   </label>
                   <input
                     type="email"
@@ -199,7 +219,7 @@ export default function Page() {
                     htmlFor="tphone"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Teacher Contact
+                    Contact Number
                   </label>
                   <input
                     type="text"
@@ -217,7 +237,7 @@ export default function Page() {
                     htmlFor="tpass"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Teacher Password
+                    Password
                   </label>
                   <input
                     type="password"
@@ -229,7 +249,7 @@ export default function Page() {
                   />
                 </div>
 
-                {/* Submit */}
+                {/* Submit Button */}
                 <Button
                   type="submit"
                   disabled={loading || !!idError}

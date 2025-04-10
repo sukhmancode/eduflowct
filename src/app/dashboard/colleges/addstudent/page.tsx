@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface Data {
   id: string | number;
@@ -17,18 +18,17 @@ interface Data {
 
 export default function Page() {
   const idRef = useRef<HTMLInputElement | null>(null);
-  const name = useRef<HTMLInputElement | null>(null);
-  const email = useRef<HTMLInputElement | null>(null);
-  const pass = useRef<HTMLInputElement | null>(null);
-  const pnumber = useRef<HTMLInputElement | null>(null);
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passRef = useRef<HTMLInputElement | null>(null);
+  const phoneRef = useRef<HTMLInputElement | null>(null);
 
-  const [loading, setloading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [collegeId, setCollegeId] = useState<string | null>(null);
   const [collegeName, setCollegeName] = useState<string>();
   const [existingIds, setExistingIds] = useState<number[]>([]);
   const [idError, setIdError] = useState<string | null>(null);
 
-  // Fetch college details and student list
   const handleCollegeDetails = async (collegeid: string) => {
     const url1 = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/details`;
     const url2 = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/student_list/`;
@@ -54,7 +54,6 @@ export default function Page() {
     if (storedId) handleCollegeDetails(storedId);
   }, []);
 
-  // Validate ID live
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     if (existingIds.includes(value)) {
@@ -64,33 +63,26 @@ export default function Page() {
     }
   };
 
-  // Submit handler
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    setloading(true);
+    setLoading(true);
 
     const obj: Data = {
-      id: 0,
-      name: "",
-      email: "",
-      number: 0,
-      pass: "",
+      id: idRef.current?.value || "",
+      name: nameRef.current?.value || "",
+      email: emailRef.current?.value || "",
+      number: phoneRef.current?.value || "",
+      pass: passRef.current?.value || "",
     };
 
     if (
-      idRef.current &&
-      name.current &&
-      email.current &&
-      pass.current &&
-      pnumber.current &&
+      obj.id &&
+      obj.name &&
+      obj.email &&
+      obj.number &&
+      obj.pass &&
       collegeId
     ) {
-      obj.id = idRef.current.value;
-      obj.email = email.current.value;
-      obj.name = name.current.value;
-      obj.number = pnumber.current.value;
-      obj.pass = pass.current.value;
-
       try {
         const response = await axios.post(
           "https://ai-teacher-api-xnd1.onrender.com/college/add_student/",
@@ -102,11 +94,11 @@ export default function Page() {
 
           toast.success("Student added successfully!");
 
-          idRef.current.value = "";
-          name.current.value = "";
-          email.current.value = "";
-          pass.current.value = "";
-          pnumber.current.value = "";
+          idRef.current!.value = "";
+          nameRef.current!.value = "";
+          emailRef.current!.value = "";
+          passRef.current!.value = "";
+          phoneRef.current!.value = "";
           setIdError(null);
         } else {
       //@ts-ignore
@@ -119,38 +111,45 @@ export default function Page() {
 
         toast.error("Something went wrong.");
       } finally {
-        setloading(false);
+        setLoading(false);
       }
     } else {
       //@ts-ignore
 
       toast.error("Please fill all fields.");
-      setloading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="add-teacher-container flex">
+    <div className="add-student-container flex">
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="add-teacher-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
-          <h2 className="welcome-message">Welcome, {collegeName}</h2>
+
+        <div className="add-student-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Welcome Message */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome, {collegeName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">Register new students below.</p>
+            </CardContent>
+          </Card>
+
+          {/* Form Section */}
           <div className="flex justify-center">
-            <div className="add-teacher-form-container flex bg-white rounded-xl shadow-md p-8">
-              <form
-                onSubmit={handleFormSubmit}
-                className="space-y-5 w-full max-w-md"
-              >
-                <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 ">
-                  <h2 className="text-2xl font-bold ">
-                    Welcome, {collegeName}
-                  </h2>
-                </div>
+            <div className="bg-white rounded-xl shadow-md p-8 w-full max-w-xl">
+              <form onSubmit={handleFormSubmit} className="space-y-5">
+                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+                  Register New Student
+                </h2>
 
                 {/* ID */}
                 <div>
@@ -183,13 +182,13 @@ export default function Page() {
                     htmlFor="sname"
                     className="block mb-1 text-sm font-medium text-gray-700"
                   >
-                    Student Name
+                    Full Name
                   </label>
                   <input
                     id="sname"
                     type="text"
                     placeholder="John Doe"
-                    ref={name}
+                    ref={nameRef}
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
                   />
                 </div>
@@ -200,13 +199,13 @@ export default function Page() {
                     htmlFor="semail"
                     className="block mb-1 text-sm font-medium text-gray-700"
                   >
-                    Student Email
+                    Email Address
                   </label>
                   <input
                     id="semail"
                     type="email"
                     placeholder="abc@example.com"
-                    ref={email}
+                    ref={emailRef}
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
                   />
                 </div>
@@ -217,13 +216,13 @@ export default function Page() {
                     htmlFor="snumber"
                     className="block mb-1 text-sm font-medium text-gray-700"
                   >
-                    Student Phone Number
+                    Contact Number
                   </label>
                   <input
                     id="snumber"
                     type="text"
                     placeholder="+91 98145-90391"
-                    ref={pnumber}
+                    ref={phoneRef}
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
                   />
                 </div>
@@ -234,13 +233,13 @@ export default function Page() {
                     htmlFor="spass"
                     className="block mb-1 text-sm font-medium text-gray-700"
                   >
-                    Student Password
+                    Password
                   </label>
                   <input
                     id="spass"
                     type="password"
                     placeholder="Password"
-                    ref={pass}
+                    ref={passRef}
                     className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
                   />
                 </div>

@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import axios from "axios";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface ViewDetails {
   id: number;
@@ -35,50 +36,52 @@ export default function Page() {
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
 
-        <div className="min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6">
-          <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
-            <h2 className="text-2xl font-bold text-center">
-              Welcome, {detail?.Colname}
-            </h2>
-          </div>
+        <div className="min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Dark Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">
+                Welcome, {detail?.Colname || "Loading..."}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Below are the official details of your college.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div className="max-w-xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-4">
+          {/* Dark College Details Card */}
+          <Card className="bg-[#1e293b] text-white shadow-md rounded-xl p-6 max-w-xl">
             {detail ? (
-              <>
-                <div className="text-gray-600">
+              <div className="space-y-4 text-gray-300">
+                <div>
                   <span className="font-semibold mr-2">🆔 College ID:</span>
-                  <span className="text-black font-medium">{detail.id}</span>
+                  <span>{detail.id}</span>
                 </div>
-                <div className="text-gray-600">
+                <div>
                   <span className="font-semibold mr-2">🏫 College Name:</span>
-                  <span className="text-black font-medium">
-                    {detail.Colname}
-                  </span>
+                  <span>{detail.Colname}</span>
                 </div>
-                <div className="text-gray-600">
-                  <span className="font-semibold mr-2">
-                    ☎️ College Contact:
-                  </span>
-                  <span className="text-black font-medium">
-                    {detail.Ccontact}
-                  </span>
+                <div>
+                  <span className="font-semibold mr-2">☎️ Contact:</span>
+                  <span>{detail.Ccontact}</span>
                 </div>
-                <div className="text-gray-600">
-                  <span className="font-semibold mr-2">📧 College Email:</span>
-                  <span className="text-black font-medium">
-                    {detail.Cemail}
-                  </span>
+                <div>
+                  <span className="font-semibold mr-2">📧 Email:</span>
+                  <span>{detail.Cemail}</span>
                 </div>
-              </>
+              </div>
             ) : (
-              <p className="text-gray-500">Loading college details...</p>
+              <p className="text-gray-400">Loading college details...</p>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     </div>

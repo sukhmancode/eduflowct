@@ -4,7 +4,12 @@ import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, PersonStandingIcon } from "lucide-react";
+import {
+  BookOpen,
+  GraduationCap,
+  Menu,
+  PersonStandingIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,16 +32,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen  w-full grid md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
-      <div className="hidden md:block border-r bg-muted/40">
+      <div
+        className="hidden md:block border-r bg-muted/40 "
+        style={{
+          background: "#f5f6f7",
+        }}
+      >
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 self-center">
-                <BookOpen className="h-5 w-5 text-white" />
+              <div className="flex items-center mt-5 gap-2 mb-6">
+                <GraduationCap className="h-5 w-5 text-primary" />
+                <span className="text-2xl  font-bold">EduFlow</span>
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600 mt-2">
-                EduFlow
-              </span>
             </Link>
           </div>
           <div className="flex-1">
@@ -49,7 +57,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex flex-col">
-        <header className="flex  h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <header
+          className="flex  h-14 items-center gap-4 border-b px-4 lg:h-[60px] lg:px-6"
+          style={{
+            background: "#f5f6f7",
+          }}
+        >
           {/* Mobile Sidebar Button */}
           <Sheet>
             <SheetTrigger asChild>
@@ -76,16 +89,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
- 
                 <DropdownMenuItem
                   onClick={() => {
                     "use client";
                     sessionStorage.removeItem("teacherId");
                     sessionStorage.removeItem("studentId");
-                    sessionStorage.removeItem("collegeId")
-                    window.location.href="/"
+                    sessionStorage.removeItem("collegeId");
+                    window.location.href = "/";
                   }}
                 >
                   Logout {/* Add logout functionality here */}
@@ -96,7 +106,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex flex-col flex-1 gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-col flex-1 gap-4 p-4 lg:gap-6 lg:p-6 bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 space-y-6">
           {children}
         </main>
       </div>

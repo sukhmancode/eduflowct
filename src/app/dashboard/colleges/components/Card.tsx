@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, useAnimation } from "framer-motion";
 
 interface Props {
   secondaryHeading?: string;
@@ -23,8 +22,8 @@ export default function Card({
     const end = typeof number === "number" ? number : 0;
     if (start === end) return;
 
-    let duration = 1000;
-    let stepTime = Math.abs(Math.floor(duration / end));
+    const duration = 1000;
+    const stepTime = Math.abs(Math.floor(duration / end));
 
     const timer = setInterval(() => {
       start += 1;
@@ -36,12 +35,7 @@ export default function Card({
   }, [number]);
 
   return (
-    <div className="relative group overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]">
-      {/* Shimmer on hover */}
-      <div className="absolute inset-0">
-        <div className="absolute w-1/3 h-full bg-white/10 blur-md transform translate-x-full group-hover:animate-shimmer pointer-events-none" />
-      </div>
-
+    <div className="relative overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]">
       {/* Content */}
       <div className="relative z-10">
         <p className="text-sm text-gray-300 mb-2">{secondaryHeading}</p>
@@ -51,7 +45,7 @@ export default function Card({
 
         {href && (
           <Link href={href}>
-            <button className="mt-4 px-4 py-2 bg-white text-gray-800 rounded-md font-semibold transition hover:shadow-lg">
+            <button className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-md font-semibold transition hover:bg-gray-600">
               View Details
             </button>
           </Link>

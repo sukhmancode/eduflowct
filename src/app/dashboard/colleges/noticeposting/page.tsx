@@ -1,8 +1,7 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -15,13 +14,13 @@ import "../styles/index.scss";
 export default function PostNotice() {
   const router = useRouter();
   const [collegeId, setCollegeId] = useState<string | null>(null);
+  const [collegeName, setCollegeName] = useState<string>("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  // Fetch collegeId from sessionStorage
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== "undefined") {
@@ -31,11 +30,23 @@ export default function PostNotice() {
         router.push("/");
       } else {
         setCollegeId(id);
+        fetchCollegeName(id);
       }
     }
   }, [router]);
 
-  // Handle file selection
+  const fetchCollegeName = async (id: string) => {
+    try {
+      const response = await fetch(
+        `https://ai-teacher-api-xnd1.onrender.com/college/${id}/details`
+      );
+      const data = await response.json();
+      setCollegeName(data.Colname);
+    } catch (err) {
+      console.error("Error fetching college name");
+    }
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -45,7 +56,6 @@ export default function PostNotice() {
     }
   };
 
-  // Handle form submission
   const handlePostNotice = async () => {
     if (!title || !description || !image) {
       toast.error("All fields are required including image!");
@@ -74,11 +84,9 @@ export default function PostNotice() {
       );
 
       if (!response.ok) throw new Error("Error posting notice.");
-
       await response.json();
       toast.success("Notice posted successfully!");
 
-      // Optional: Reset form
       setTitle("");
       setDescription("");
       setImage(null);
@@ -97,48 +105,72 @@ export default function PostNotice() {
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="flex justify-center items-center self-center min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
-          <Card className="w-full md:w-[500px] shadow-2xl border border-gray-200 p-6 mt-5">
-            <CardHeader />
-            <h1 className="text-center font-semibold text-3xl mb-4">
-              Upload Notice!
-            </h1>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-1">
-                <Label>Notice Title</Label>
-                <Input
-                  type="text"
-                  placeholder="Enter notice title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label>Description</Label>
-                <Textarea
-                  placeholder="Enter notice description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={5}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label className="mb-1">Upload Image</Label>
-                <Input type="file" onChange={handleFileChange} />
-              </div>
-              <Button
-                onClick={handlePostNotice}
-                className="w-full mt-3"
-                disabled={loading}
-              >
-                {loading ? "Posting..." : "Post Notice"}
-              </Button>
+
+        <div className="min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome, {collegeName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Use this form to post a new notice to your college .
+              </p>
             </CardContent>
           </Card>
+
+          {/* Form Card */}
+          <div className="flex justify-center">
+            <Card className="bg-white w-full max-w-xl p-8 rounded-xl shadow-md">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-800 mb-4">
+                  Upload Notice
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-5">
+                <div className="flex flex-col gap-1">
+                  <Label className="text-gray-700">Notice Title</Label>
+                  <Input
+                    type="text"
+                    placeholder="Enter notice title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label className="text-gray-700">Description</Label>
+                  <Textarea
+                    placeholder="Enter notice description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label className="text-gray-700">Upload Image</Label>
+                  <Input type="file" onChange={handleFileChange} required />
+                </div>
+
+                <Button
+                  onClick={handlePostNotice}
+                  disabled={loading}
+                  className="w-full bg-black text-white hover:bg-neutral-800 transition"
+                >
+                  {loading ? "Posting..." : "Post Notice"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
