@@ -61,11 +61,11 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="college-details-container md:pl-[300px]">
+          <div className="college-details-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
             <h2 className="welcome-message ">Welcome, {collegeName}</h2>
             <div className="cards">
               <Card
-                secondaryHeading="Total Number of Students "
+                secondaryHeading="Total Number of Classes"
                 number={classes}
                 secondary=" Classes"
               />

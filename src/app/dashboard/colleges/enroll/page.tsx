@@ -50,7 +50,7 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="add-teacher-content-container">
+          <div className="add-teacher-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
             <h2 className="welcome-message"> Welcome, {collegeName}</h2>
             <div className="flex justify-center">
               <div className="add-teacher-form-container flex  bg-muted/40">

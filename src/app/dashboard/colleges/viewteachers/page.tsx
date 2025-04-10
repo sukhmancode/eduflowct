@@ -68,26 +68,38 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="view-teachers-content-container md:pl-[300px]">
-            <h2 className="welcome-message"> Welcome, {collegeName}</h2>
-            <div className="flex flex-wrap p-5 gap-3">
+          <div className="view-teachers-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
+            <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
+              <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
+            </div>
+
+            <div className="flex flex-wrap p-5 gap-3 justify-center">
               {teachers?.map((data, index) => {
                 return (
-                  <div className="card-container" key={index}>
-                    <div className="card-secondary-heading">
-                      Teacher Id: {data.id}
+                  <div
+                    key={index}
+                    className="relative group overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]"
+                  >
+                    {/* Shimmer Effect */}
+                    <div className="absolute inset-0">
+                      <div className="absolute w-1/3 h-full bg-white/10 blur-md transform translate-x-full group-hover:animate-shimmer pointer-events-none" />
                     </div>
-                    <div className="card-number">
-                      Teacher Name: {data.Tname}
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <p className="text-sm text-gray-300 mb-2">Teacher ID</p>
+                      <p className="text-xl font-bold mb-2">{data.id}</p>
+
+                      <p className="text-sm text-gray-300 mb-1">Teacher Name</p>
+                      <p className="text-lg font-semibold mb-4">{data.Tname}</p>
+
+                      <button
+                        onClick={() => handleDetails(data.id)}
+                        className="mt-2 px-4 py-2 bg-white text-gray-800 rounded-md font-semibold transition hover:shadow-lg"
+                      >
+                        View Details
+                      </button>
                     </div>
-                    <button
-                      className="view-details"
-                      onClick={() => {
-                        handleDetails(data.id);
-                      }}
-                    >
-                      View Details
-                    </button>
                   </div>
                 );
               })}

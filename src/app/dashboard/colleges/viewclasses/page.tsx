@@ -6,7 +6,6 @@ import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import "../styles/index.scss";
-
 import axios from "axios";
 import "../styles/card.scss";
 
@@ -58,16 +57,27 @@ export default function page() {
           <div className="navbar">
             <Navbar />
           </div>
-          <div className="view-classes-content-container">
-            <h2 className="welcome-message"> Welcome, {collegeName}</h2>
+          <div className="view-classes-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
+            <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
+              <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
+            </div>
             <div className="flex flex-wrap p-5 gap-3">
               {classes?.map((data, index) => {
                 return (
-                  <div className="card-container" key={index}>
-                    <div className="card-secondary-heading">
-                      Class Id: {data.id}
+                  <div className="relative group overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]">
+                    <div className="absolute inset-0">
+                      <div className="absolute w-1/3 h-full bg-white/10 blur-md transform translate-x-full group-hover:animate-shimmer pointer-events-none" />
                     </div>
-                    <div className="card-number">Class Name: {data.Cname}</div>
+
+                    <div className="relative z-10">
+                      <p className="text-sm text-gray-300 mb-2">
+                        {" "}
+                        Class Id: {data.id}
+                      </p>
+                      <p className="text-2xl font-bold">
+                        Class Name: {data.Cname}
+                      </p>
+                    </div>
                   </div>
                 );
               })}

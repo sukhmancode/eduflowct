@@ -66,10 +66,10 @@ export default function Page() {
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="view-classes-content-container p-5">
-          <h2 className="welcome-message text-2xl font-bold mb-4">
-            Welcome, {collegeName}
-          </h2>
+        <div className="view-classes-content-container p-5 md:pl-[300px]">
+          <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
+            <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
+          </div>
           <div className="flex flex-col items-center gap-5">
             <form
               className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md"
