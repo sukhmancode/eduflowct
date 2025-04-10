@@ -36,7 +36,6 @@ export default function FancyQuiz() {
   const [started, setStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120);
 
-  const quizRef = useRef<HTMLDivElement>(null);
   const studentId =
     typeof window !== "undefined" ? sessionStorage.getItem("studentId") : null;
 
@@ -94,32 +93,55 @@ export default function FancyQuiz() {
     if (studentId) fetchQuiz();
   }, [language]);
 
-  // Prevent fullscreen exit
+  // 🔐 Prevent fullscreen exit
   useEffect(() => {
-    const handleExit = () => {
+    const handleFullscreenExit = () => {
       if (started && !showResult && !document.fullscreenElement) {
         // @ts-ignore
         toast.error("You can't exit fullscreen until the quiz is complete.");
-        document.documentElement.requestFullscreen().catch(() => {});
+
+        setTimeout(() => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
+        }, 300);
       }
     };
-    document.addEventListener("fullscreenchange", handleExit);
-    return () => document.removeEventListener("fullscreenchange", handleExit);
+
+    document.addEventListener("fullscreenchange", handleFullscreenExit);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenExit);
+  }, [started, showResult]);
+  useEffect(() => {
+    const preventEscapeKey = (e: KeyboardEvent) => {
+      if (started && !showResult && e.key === "Escape") {
+        setTimeout(() => {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }, 100);
+        // @ts-ignore
+        toast.error("Escape is disabled during the quiz.");
+      }
+    };
+
+    document.addEventListener("keydown", preventEscapeKey);
+
+    return () => {
+      document.removeEventListener("keydown", preventEscapeKey);
+    };
   }, [started, showResult]);
 
-  // Prevent reload
+  // 🛡 Prevent page reload
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (started && !showResult) {
         e.preventDefault();
-        e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", beforeUnload);
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [started, showResult]);
 
-  // Timer countdown
+  // ⏲ Timer logic
   useEffect(() => {
     if (!started || submitted || showResult || loading) return;
     if (timeLeft === 0) {
@@ -136,10 +158,11 @@ export default function FancyQuiz() {
     setTimeLeft(120);
   }, [currentIndex]);
 
-  const formatTime = (sec: number) =>
-    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
-      sec % 60
-    ).padStart(2, "0")}`;
+  const formatTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
+      2,
+      "0"
+    )}`;
 
   const handleSubmit = () => {
     if (submitted) return;
@@ -169,6 +192,7 @@ export default function FancyQuiz() {
     document.documentElement.requestFullscreen().catch(() => {});
   };
 
+  // 🚀 UI Rendering
   if (!started) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
@@ -230,10 +254,7 @@ export default function FancyQuiz() {
   }
 
   return (
-    <div
-      ref={quizRef}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 p-6 space-y-6"
-    >
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 p-6 space-y-6">
       <Card className="w-full bg-[#1e293b] text-white border border-gray-800 shadow-md">
         <CardHeader>
           <CardTitle className="text-2xl">EduQuiz</CardTitle>
@@ -241,7 +262,7 @@ export default function FancyQuiz() {
         <CardContent>
           <p className="text-gray-300">
             Test your knowledge. Each question has a 2-minute timer. Fullscreen
-            is enabled.
+            is enforced.
           </p>
         </CardContent>
       </Card>

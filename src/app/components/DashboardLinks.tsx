@@ -83,11 +83,21 @@ export const teacherLinks: NavProps[] = [
   },
   {
     id: 4,
+    name: "Generate Quiz",
+    href: "/dashboard/teacher/generatequiz",
+  },
+  {
+    id: 5,
+    name: "Upload Marks",
+    href: "/dashboard/teacher/uploadMarks",
+  },
+  {
+    id: 6,
     name: "SendEmail",
     href: "/dashboard/teacher/sendemail",
   },
   {
-    id: 5,
+    id: 7,
     name: "Generate certificate",
     href: "/dashboard/teacher/addcertificate",
   },

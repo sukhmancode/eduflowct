@@ -1,10 +1,11 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface Class {
   id: number;
@@ -40,125 +41,145 @@ export default function Classes() {
   }, []);
 
   useEffect(() => {
-    if (!teacherID) {
-      return;
-    }
-    // Fetch teacher details
-    axios
-      .get(`https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherID}/detail`)
-      .then((response) => {
-        const { Tname } = response.data;
-        setTeacherName(Tname);
-      })
-      .catch((error) => console.error("Error fetching teacher details"));
+    if (!teacherID) return;
 
-    // Fetch classes
     axios
-      .get(`https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherID}/classes`)
-      .then((response) => setClasses(response.data))
-      .catch((error) => console.error("Error fetching classes"));
+      .get(
+        `https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherID}/detail`
+      )
+      .then((res) => setTeacherName(res.data.Tname))
+      .catch(() => console.error("Failed to fetch teacher details"));
+
+    axios
+      .get(
+        `https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherID}/classes`
+      )
+      .then((res) => setClasses(res.data))
+      .catch(() => console.error("Failed to fetch classes"));
   }, [teacherID]);
 
   const handleViewStudents = (classId: number) => {
     setSelectedClass(classId);
     setLoading(true);
     axios
-      .get(`https://ai-teacher-api-xnd1.onrender.com/teacher/viewstudents/${classId}`)
-      .then((response) => setStudents(response.data))
-      .catch((error) => console.error("Error fetching students"))
+      .get(
+        `https://ai-teacher-api-xnd1.onrender.com/teacher/viewstudents/${classId}`
+      )
+      .then((res) => setStudents(res.data))
+      .catch(() => console.error("Failed to fetch students"))
       .finally(() => setLoading(false));
   };
 
   return (
-    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="w-full">
-        {teacherName && (
-          <div className="mb-4 p-4 text-bold text-3xl text-white shadow-sm rounded">
-            <h2 className="text-3xl text-black p-5
-   rounded font-bold uppercase">Welcome, {teacherName}</h2>
-          </div>
-        )}
+    <div className="p-6 bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 min-h-screen space-y-6">
+      {teacherName && (
+        <Card className="bg-[#1e293b] text-white border border-gray-700 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl">Welcome, {teacherName}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-300">
+              Choose a class to view enrolled students and their assignments.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="flex flex-wrap gap-4">
-          {classes.length > 0 ? (
-            classes.map((cls) => (
-              <Card key={cls.id} className="shadow-lg border bg-secondary border-gray-200">
-                <CardHeader     />
-                <CardContent className="flex gap-4 flex-col">
-                  <p className="text-2xl font-semibold">{cls.Cname}</p>
-                  <div className="flex items-center bg-primary rounded-md w-fit cursor-pointer">
-                  <Button onClick={() => handleViewStudents(cls.id)} className="">
-                    View Students
-                  </Button>
-                  <ChevronRight fill="#" size={32}/>
-                  </div>
-           
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <h1>No classes available</h1>
-          )}
-        </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        {classes.length > 0 ? (
+          classes.map((cls) => (
+            <Card
+              key={cls.id}
+              className="bg-[#1e293b] text-white border border-gray-700 shadow-md hover:shadow-xl transition"
+            >
+              <CardHeader />
+              <CardContent className="flex flex-col gap-4">
+                <p className="text-xl font-semibold text-white">{cls.Cname}</p>
+                <Button
+                  onClick={() => handleViewStudents(cls.id)}
+                  className="w-fit  text-black bg-white hover:bg-white"
+                >
+                  View Students
+                  <ChevronRight className="ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-gray-600">No classes available.</p>
+        )}
       </div>
 
       {selectedClass && (
-        <div className="mt-6 ">
-          <h2 className="text-xl font-bold">Students in Class <span>{selectedClass}</span></h2>
-          <div className="mt-4 flex flex-col">
+        <div className="space-y-4 mt-6 ">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Students in Class #{selectedClass}
+          </h2>
+          <div className="flex flex-wrap gap-[10px]">
             {loading ? (
-              <Button type="button" className="bg-indigo-500 flex items-center" disabled>
-                <svg className="mr-3 w-5 h-5 animate-spin" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none" />
-                </svg>
-                <p className="text-2xl text-white">Loading...</p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
-              </Button>
+              <div className="flex items-center gap-4 text-lg text-indigo-600">
+                <div className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                Loading students...
+              </div>
             ) : students && students.length > 0 ? (
               students.map((student) => (
-                <Card key={student.id} className="shadow-md border border-gray-200 my-2">
+                <Card
+                  key={student.id}
+                  className="bg-[#1e293b] max-w-[500px] text-white border border-gray-700 shadow-md"
+                >
                   <CardHeader>
                     <CardTitle>
-                      {student.Sname} (ID: {student.college_id})
+                      {student.Sname}{" "}
+                      <span className="text-sm text-gray-300">
+                        (ID: {student.college_id})
+                      </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <h3 className="font-semibold">Assignments:</h3>
-                    <ul className="list-disc list-inside ">
-                    {student.assignments.map((assignment, index) => (
-                      <li key={index} className="mt-2 list-none">
-                        <div>
-                          <p>
-                            <span className="font-medium">{assignment.title}</span>
-                          </p>
-                          {assignment.url ? (
-                            <div className="mt-2">
-                              <a
-                                href={assignment.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Button className="cursor-pointer text-white text-1xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                                  View
-                                </Button>
-                                
-                                <p className="mt-3">Grade: <span className="text-semibold text-white text-xl font-semibold">{assignment.grade}</span></p>
-                              </a>
+                    <h3 className="font-semibold mb-2 text-gray-200">
+                      Assignments:
+                    </h3>
+                    {student.assignments.length > 0 ? (
+                      <ul className="space-y-3">
+                        {student.assignments.map((assignment, index) => (
+                          <li key={index}>
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-medium">
+                                  {assignment.title}
+                                </p>
+                                {assignment.url ? (
+                                  <a
+                                    href={assignment.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 underline text-sm"
+                                  >
+                                    View Submission
+                                  </a>
+                                ) : (
+                                  <p className="text-sm text-red-400">
+                                    Not submitted
+                                  </p>
+                                )}
+                              </div>
+                              <p className="text-sm font-semibold text-purple-400">
+                                Grade: {assignment.grade}
+                              </p>
                             </div>
-                          ) : (
-                            <h2 className="font-semibold text-red-500 mt-2">Not submitted yet</h2>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-
-                    </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-300">No assignments found.</p>
+                    )}
                   </CardContent>
                 </Card>
               ))
             ) : (
-              <Card>
-                <CardTitle className="text-white text-3xl">No students found.</CardTitle></Card>
+              <Card className="bg-[#1e293b] text-gray-300 text-center border border-gray-700">
+                <CardContent>No students found in this class.</CardContent>
+              </Card>
             )}
           </div>
         </div>

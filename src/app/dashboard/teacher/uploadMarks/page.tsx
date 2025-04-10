@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -19,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ClassItem = {
   id: number;
@@ -46,8 +41,7 @@ export default function UploadMSTmarks() {
     if (id) {
       setTeacherId(id);
     } else {
-      //@ts-ignore
-
+      // @ts-ignore
       toast.error("Teacher ID not found in session!");
     }
   }, []);
@@ -56,10 +50,11 @@ export default function UploadMSTmarks() {
     if (!teacherId) return;
     setLoading(true);
     axios
-      .get(`https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherId}/classes`)
+      .get(
+        `https://ai-teacher-api-xnd1.onrender.com/teacher/${teacherId}/classes`
+      )
       .then((res) => setClasses(res.data))
-      //@ts-ignore
-
+      // @ts-ignore
       .catch(() => toast.error("Failed to fetch class list."))
       .finally(() => setLoading(false));
   }, [teacherId]);
@@ -69,8 +64,7 @@ export default function UploadMSTmarks() {
     const file = type === "mst1" ? mst1File : mst2File;
 
     if (!classId || !file) {
-      //@ts-ignore
-
+      // @ts-ignore
       toast.error("Please select a class and upload a file.");
       return;
     }
@@ -87,8 +81,7 @@ export default function UploadMSTmarks() {
       await axios.post(endpoint, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      //@ts-ignore
-
+      // @ts-ignore
       toast.success(`Successfully uploaded ${type.toUpperCase()} file!`);
 
       // Reset form
@@ -109,102 +102,133 @@ export default function UploadMSTmarks() {
       setClasses(updated.data);
     } catch (err) {
       console.error("Upload failed:", err);
-      //@ts-ignore
-
+      // @ts-ignore
       toast.error("Upload failed.");
     }
   };
 
   return (
-    <div className="w-fit mx-auto">
-      <Card className="p-7">
-        <h2 className="text-2xl font-semibold mb-4">Upload MST Marks</h2>
-        <Tabs defaultValue="mst1">
-          <TabsList className="mb-4">
-            <TabsTrigger value="mst1">MST-1</TabsTrigger>
-            <TabsTrigger value="mst2">MST-2</TabsTrigger>
-          </TabsList>
+    <div className="w-full  mx-auto py-6 ">
+      {/* Welcome Message with Dark Background */}
+      <div className="w-full bg-[#1e293b] text-white p-6 rounded-xl shadow-lg mb-6">
+        <h1 className="text-3xl font-semibold ">
+          Welcome to the AI Quiz Generator!
+        </h1>
+        <p className="text-sm text-gray-300 ">
+          Generate quizzes based on topics, difficulty, and more. Fill in the
+          fields below and get started!
+        </p>
+      </div>
 
-          {/* MST-1 TAB */}
-          <TabsContent value="mst1">
-            <div className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <Label>Select Class</Label>
-                <Select onValueChange={(val) => setMst1ClassId(val)} value={mst1ClassId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose class" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {loading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : (
-                      classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id.toString()}>
-                          {cls.Cname} {cls.mst1_url ? "✅" : ""}
+      {/* Form to Upload MST Marks */}
+      <Card className="space-y-6 bg-white text-black shadow-lg rounded-xl p-6 max-w-[700px]">
+        <CardHeader>
+          <CardTitle className="text-xl ">Upload MST Marks</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* MST-1 Tab */}
+          <Tabs defaultValue="mst1">
+            <TabsList className="mb-4 flex justify-between">
+              <TabsTrigger value="mst1" className="w-1/2">
+                MST-1
+              </TabsTrigger>
+              <TabsTrigger value="mst2" className="w-1/2">
+                MST-2
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="mst1">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Select Class</Label>
+                  <Select value={mst1ClassId} onValueChange={setMst1ClassId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading...
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
+                      ) : (
+                        classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id.toString()}>
+                            {cls.Cname} {cls.mst1_url ? "✅" : ""}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Upload MST-1 File</Label>
+                  <Input
+                    ref={mst1InputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.csv,.xlsx"
+                    onChange={(e) => setMst1File(e.target.files?.[0] || null)}
+                  />
+                  {mst1File && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {mst1File.name}
+                    </p>
+                  )}
+                </div>
+
+                <Button onClick={() => handleUpload("mst1")}>
+                  Upload MST-1
+                </Button>
               </div>
+            </TabsContent>
 
-              <div className="flex flex-col gap-2">
-                <Label>Upload MST-1 File</Label>
-                <Input
-                  ref={mst1InputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.csv,.xlsx"
-                  onChange={(e) => setMst1File(e.target.files?.[0] || null)}
-                />
-                {mst1File && (
-                  <p className="text-sm text-muted-foreground mt-1">{mst1File.name}</p>
-                )}
-              </div>
-
-              <Button onClick={() => handleUpload("mst1")}>Upload MST-1</Button>
-            </div>
-          </TabsContent>
-
-          {/* MST-2 TAB */}
-          <TabsContent value="mst2">
-            <div className="space-y-4">
-              <div>
-                <Label>Select Class</Label>
-                <Select onValueChange={(val) => setMst2ClassId(val)} value={mst2ClassId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose class" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {loading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : (
-                      classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id.toString()}>
-                          {cls.Cname} {cls.mst2_url ? "✅" : ""}
+            {/* MST-2 Tab */}
+            <TabsContent value="mst2">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Select Class</Label>
+                  <Select value={mst2ClassId} onValueChange={setMst2ClassId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose class" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading...
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+                      ) : (
+                        classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id.toString()}>
+                            {cls.Cname} {cls.mst2_url ? "✅" : ""}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div>
-                <Label>Upload MST-2 File</Label>
-                <Input
-                  ref={mst2InputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.csv,.xlsx"
-                  onChange={(e) => setMst2File(e.target.files?.[0] || null)}
-                />
-                {mst2File && (
-                  <p className="text-sm text-muted-foreground mt-1">{mst2File.name}</p>
-                )}
-              </div>
+                <div className="space-y-2">
+                  <Label>Upload MST-2 File</Label>
+                  <Input
+                    ref={mst2InputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.csv,.xlsx"
+                    onChange={(e) => setMst2File(e.target.files?.[0] || null)}
+                  />
+                  {mst2File && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {mst2File.name}
+                    </p>
+                  )}
+                </div>
 
-              <Button onClick={() => handleUpload("mst2")}>Upload MST-2</Button>
-            </div>
-          </TabsContent>
-        </Tabs>
+                <Button onClick={() => handleUpload("mst2")}>
+                  Upload MST-2
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
       </Card>
     </div>
   );

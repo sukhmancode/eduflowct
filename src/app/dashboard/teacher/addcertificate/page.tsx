@@ -1,13 +1,9 @@
 "use client";
+
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -69,25 +65,42 @@ export default function CertificateGenerator() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 space-y-6 px-4">
-      <Card>
+    <div className="min-h-screen  flex flex-col  p-6">
+      {/* Welcome Message */}
+      <div className="w-full  bg-[#1e293b] text-white p-6 rounded-xl shadow-lg mb-6">
+        <h1 className="text-2xl font-semibold ">
+          Welcome to the Certificate Generator
+        </h1>
+        <p className="text-sm text-gray-300 ">
+          Generate and download a certificate for students. Fill in the name and
+          roll number, then click "Generate Certificate".
+        </p>
+      </div>
+
+      {/* Certificate Generation Form */}
+      <Card className="w-full max-w-[700px] bg-[#1e293b] text-white border border-gray-700 shadow-lg rounded-xl p-6 space-y-6">
         <CardHeader>
-          <CardTitle className="text-2xl">Certificate Generator</CardTitle>
+          <CardTitle className="text-xl text-center">Enter Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
             type="text"
-            placeholder="Enter Name"
+            placeholder="Enter Student Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className="bg-[#2d3748] text-white border border-gray-600 focus:ring-2 focus:ring-white"
           />
           <Input
             type="text"
             placeholder="Enter Roll Number"
             value={rollNo}
             onChange={(e) => setRollNo(e.target.value)}
+            className="bg-[#2d3748] text-white border border-gray-600 focus:ring-2 focus:ring-white"
           />
-          <Button className="w-full" onClick={handleGenerate}>
+          <Button
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:bg-blue-600"
+            onClick={handleGenerate}
+          >
             Generate Certificate
           </Button>
         </CardContent>
@@ -106,7 +119,7 @@ export default function CertificateGenerator() {
             style={{ color: "#000", backgroundColor: "#fff" }}
           >
             <Image
-              src="/gne.jpg"
+              src="/gne.png" // Ensure this is in your public folder
               width={100}
               height={100}
               alt="GNE Logo"
@@ -126,7 +139,11 @@ export default function CertificateGenerator() {
             </p>
           </div>
 
-          <Button className="mt-4 w-full" onClick={handleDownloadAsImage} disabled={loading}>
+          <Button
+            className="mt-4 w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white hover:bg-blue-600 shadow-md"
+            onClick={handleDownloadAsImage}
+            disabled={loading}
+          >
             {loading ? "Generating..." : "Download as Image"}
           </Button>
         </DialogContent>
