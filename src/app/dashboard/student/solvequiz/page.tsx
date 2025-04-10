@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, ChevronRight, Loader2, Trophy } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { CheckCircle, ChevronRight, Trophy, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
-import axios from "axios";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 type Question = {
   id: number;
@@ -17,227 +24,329 @@ type Question = {
   answer: string;
 };
 
-export default function SolveQuiz() {
+export default function FancyQuiz() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [answered, setAnswered] = useState<number[]>([]);
-  const [language, setLanguage] = useState<string>("english");
+  const [submitted, setSubmitted] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [language, setLanguage] = useState("english");
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(120);
+
+  const quizRef = useRef<HTMLDivElement>(null);
+  const studentId =
+    typeof window !== "undefined" ? sessionStorage.getItem("studentId") : null;
+
+  const currentQuestion = questions[currentIndex];
+  const totalQuestions = questions.length;
 
   const languages = [
-    "punjabi", 
-    "english", 
-    "hindi", 
-    "bengali", 
-    "marathi", 
-    "telugu", 
-    "tamil", 
-    "gujarati", 
-    "urdu", 
-    "kannada", 
-    "odia", 
-    "malayalam"
+    "english",
+    "hindi",
+    "punjabi",
+    "bengali",
+    "marathi",
+    "tamil",
+    "telugu",
+    "gujarati",
+    "kannada",
+    "odia",
+    "urdu",
+    "malayalam",
   ];
-  
+
+  const fetchQuiz = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/get_quiz/${language}`
+      );
+      const data = res.data[0]?.quiz || [];
+
+      if (!data.length && language !== "english") {
+        // @ts-ignore
+        toast.error(
+          `Failed to load quiz in ${language}. Falling back to English.`
+        );
+        setLanguage("english");
+        return;
+      }
+
+      setQuestions(data);
+      setCurrentIndex(0);
+      setScore(0);
+      setSelected(null);
+      setShowResult(false);
+      setSubmitted(false);
+    } catch {
+      // @ts-ignore
+      toast.error("Error fetching quiz. Please try again.");
+      setQuestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const studentId = sessionStorage.getItem("studentId");
-
-    if (!studentId) {
-      console.error("Student ID not found in sessionStorage.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
-    axios
-      .get(`https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/get_quiz/${language}`)
-      .then((res) => {
-        // Access quiz data from res.data[0].quiz
-        setQuestions(res.data[0].quiz); // This assumes that the quiz data is in the first item of the array
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load quiz:", err);
-        setLoading(false);
-      });
+    if (studentId) fetchQuiz();
   }, [language]);
 
-  const handleNext = () => {
-    if (selected === questions[currentIndex].answer) {
-      setScore(prev => prev + 1);
+  // Prevent fullscreen exit
+  useEffect(() => {
+    const handleExit = () => {
+      if (started && !showResult && !document.fullscreenElement) {
+        // @ts-ignore
+        toast.error("You can't exit fullscreen until the quiz is complete.");
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    };
+    document.addEventListener("fullscreenchange", handleExit);
+    return () => document.removeEventListener("fullscreenchange", handleExit);
+  }, [started, showResult]);
+
+  // Prevent reload
+  useEffect(() => {
+    const beforeUnload = (e: BeforeUnloadEvent) => {
+      if (started && !showResult) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    return () => window.removeEventListener("beforeunload", beforeUnload);
+  }, [started, showResult]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (!started || submitted || showResult || loading) return;
+    if (timeLeft === 0) {
+      handleSubmit();
+      return;
     }
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, submitted, showResult, started, loading]);
 
-    setAnswered(prev => [...prev, currentIndex]);
+  useEffect(() => {
+    setTimeLeft(120);
+  }, [currentIndex]);
+
+  const formatTime = (sec: number) =>
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
+      sec % 60
+    ).padStart(2, "0")}`;
+
+  const handleSubmit = () => {
+    if (submitted) return;
+    if (selected === currentQuestion.answer) setScore((prev) => prev + 1);
+    setSubmitted(true);
+  };
+
+  const handleNext = () => {
+    setSubmitted(false);
     setSelected(null);
-
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex((prev) => prev + 1);
     } else {
-      setShowResults(true);
+      setShowResult(true);
+      document.exitFullscreen().catch(() => {});
     }
   };
 
   const restartQuiz = () => {
-    setCurrentIndex(0);
-    setSelected(null);
-    setScore(0);
-    setShowResults(false);
-    setAnswered([]);
+    setStarted(false);
+    document.exitFullscreen().catch(() => {});
+    fetchQuiz();
   };
 
-  const currentQuestion = questions[currentIndex];
-  const progressPercentage = questions.length > 0 ? ((answered.length) / questions.length) * 100 : 0;
+  const handleStart = () => {
+    setStarted(true);
+    document.documentElement.requestFullscreen().catch(() => {});
+  };
 
-  if (loading) {
+  if (!started) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium">Loading your quiz...</p>
-      </div>
-    );
-  }
-
-  if (questions.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-2xl">
-          <CardContent className="pt-6 text-center">
-            <p className="text-lg text-red-500">Failed to load quiz questions.</p>
-            <Button className="mt-4" onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (showResults) {
-    const percentage = Math.round((score / questions.length) * 100);
-    let message = "Great effort!";
-    let textColor = "text-yellow-500";
-
-    if (percentage >= 80) {
-      message = "Outstanding!";
-      textColor = "text-green-500";
-    } else if (percentage <= 40) {
-      message = "Keep practicing!";
-      textColor = "text-blue-500";
-    }
-
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-        <Card className="w-full max-w-2xl shadow-lg">
-          <CardHeader className="pb-2 text-center">
-            <CardTitle className="text-3xl font-bold">Quiz Completed!</CardTitle>
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+        <Card className="w-full max-w-2xl bg-[#1e293b] text-white border border-gray-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl">Welcome to EduQuiz</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 text-center">
-            <div className="mb-6">
-              <Trophy className="h-16 w-16 mx-auto text-yellow-400 mb-2" />
-              <h3 className={`text-2xl font-bold ${textColor} mb-2`}>{message}</h3>
-            </div>
-
-            <div className="p-6 bg-gray-50 rounded-lg mb-6">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600 font-medium">Your Score</span>
-                <span className="font-bold">{score} / {questions.length}</span>
-              </div>
-              <Progress value={percentage} className="h-3" />
-              <p className="mt-2 text-2xl font-bold">{percentage}%</p>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full text-lg py-6" onClick={restartQuiz}>
-              Take Quiz Again
+          <CardContent>
+            <p className="text-gray-300 mb-4">
+              Click start to begin the quiz. Fullscreen will be enabled and page
+              reload will be blocked.
+            </p>
+            <Button
+              onClick={handleStart}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white text-lg py-3"
+            >
+              Start Quiz
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (loading || !questions.length) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-100">
+        <div className="h-12 w-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-lg text-gray-700">Loading quiz...</p>
+      </div>
+    );
+  }
+
+  if (showResult) {
+    const percentage = Math.round((score / totalQuestions) * 100);
+    return (
+      <div className="min-h-screen flex justify-center items-center px-6 py-10 bg-gradient-to-br from-slate-100 to-slate-200">
+        <div className="bg-white rounded-3xl p-8 text-center shadow-xl w-full max-w-xl">
+          <Trophy className="mx-auto w-16 h-16 text-yellow-400 mb-4" />
+          <h2 className="text-3xl font-bold mb-2">Quiz Completed!</h2>
+          <p className="text-lg text-gray-600 mb-6">
+            You scored <strong>{score}</strong> out of{" "}
+            <strong>{totalQuestions}</strong>
+          </p>
+          <Progress value={percentage} className="h-3 mb-4" />
+          <p className="text-xl font-semibold text-purple-700 mb-4">
+            {percentage >= 80
+              ? "🎉 Excellent!"
+              : percentage >= 50
+              ? "👍 Good effort!"
+              : "📚 Keep practicing!"}
+          </p>
+          <Button onClick={restartQuiz} className="w-full mt-2 text-lg py-5">
+            Retake Quiz
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col justify-center items-center">
-      <div className="max-w-[600px] w-full justify-center p-4 my-8">
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-500">
-              Progress: {answered.length} of {questions.length} questions answered
-            </span>
-            <span className="text-sm font-medium">
-              Score: {score}
-            </span>
-          </div>
-          <Progress value={progressPercentage} className="h-2" />
-        </div>
+    <div
+      ref={quizRef}
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 p-6 space-y-6"
+    >
+      <Card className="w-full bg-[#1e293b] text-white border border-gray-800 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">EduQuiz</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-300">
+            Test your knowledge. Each question has a 2-minute timer. Fullscreen
+            is enabled.
+          </p>
+        </CardContent>
+      </Card>
 
-        <div className="mb-6">
-          <Label htmlFor="language" className="text-sm font-medium text-gray-500 mb-2">
-            Select Language
-          </Label>
-          <Select
-            value={language}
-            onValueChange={(value) => setLanguage(value)}
-          >
-            <SelectTrigger className="w-full p-3 border-2 rounded-md">
-              <span>{language.charAt(0).toUpperCase() + language.slice(1)}</span>
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map((lang, index) => (
-                <SelectItem key={`${lang}`} value={lang}>
-                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Card className="mb-6 shadow-md overflow-hidden border-t-4 border-primary">
-          <CardHeader className="bg-gray-50 pb-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-500">Question {currentIndex + 1} of {questions.length}</span>
-              {score > 0 && <span className="text-sm font-medium text-green-600 flex items-center"><CheckCircle className="h-4 w-4 mr-1" /> {score} correct</span>}
+      <div className="max-w-5xl grid md:grid-cols-2 gap-4 mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
+        {/* Left */}
+        <div className="bg-[#f6f8fe] px-10 py-12 flex flex-col justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-blue-600 mb-2">
+              EduQuiz
+            </h2>
+            <p className="text-sm text-gray-500 mb-2">
+              Question {currentIndex + 1} of {totalQuestions}
+            </p>
+            <h1 className="text-2xl font-bold text-gray-800 leading-snug mb-4">
+              {currentQuestion?.question}
+            </h1>
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md px-3 py-2 inline-flex w-fit">
+              <Clock className="h-4 w-4" />
+              Time left: {formatTime(timeLeft)}
             </div>
-            <CardTitle className="text-xl font-bold mt-2">{currentQuestion.question}</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <RadioGroup
-              value={selected || ""}
-              onValueChange={setSelected}
-              className="space-y-4"
-            >
-              {currentQuestion.options.map((option, idx) => (
+          </div>
+          <div className="mt-10">
+            <Label className="text-sm text-gray-500 mb-2 block">
+              Select Language
+            </Label>
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-full p-3 border bg-white rounded-md">
+                {language.charAt(0).toUpperCase() + language.slice(1)}
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="p-10 space-y-6">
+          <RadioGroup
+            value={selected ?? ""}
+            onValueChange={setSelected}
+            className="space-y-4"
+          >
+            {currentQuestion?.options.map((option, idx) => {
+              const isCorrect = submitted && option === currentQuestion.answer;
+              const isWrong =
+                submitted &&
+                selected === option &&
+                option !== currentQuestion.answer;
+
+              return (
                 <div
-                  key={`${currentQuestion.id}-${option}`} // Ensuring unique keys
-                  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all ${
-                    selected === option
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                  key={idx}
+                  className={`border-2 rounded-xl px-4 py-3 cursor-pointer transition-all ${
+                    isCorrect
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : isWrong
+                      ? "border-red-500 bg-red-50 text-red-700"
+                      : selected === option
+                      ? "border-blue-600 bg-blue-50 text-blue-900"
+                      : "border-gray-200 hover:border-blue-400"
                   }`}
                 >
-                  <RadioGroupItem value={option} id={`option-${idx}`} className="h-5 w-5" />
-                  <Label htmlFor={`option-${idx}`} className="flex-grow text-lg cursor-pointer">
+                  <Label
+                    htmlFor={`option-${idx}`}
+                    className="flex items-center cursor-pointer text-sm font-medium"
+                  >
+                    <RadioGroupItem
+                      id={`option-${idx}`}
+                      value={option}
+                      className="mr-3"
+                      disabled={submitted}
+                    />
                     {option}
                   </Label>
                 </div>
-              ))}
-            </RadioGroup>
-          </CardContent>
-          <CardFooter className="pt-4 pb-6">
+              );
+            })}
+          </RadioGroup>
+
+          {!submitted ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={!selected}
+              className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl text-lg"
+            >
+              Submit
+            </Button>
+          ) : (
             <Button
               onClick={handleNext}
-              disabled={!selected}
-              className={`w-full py-6 text-lg font-medium flex items-center justify-center ${!selected ? 'opacity-70' : 'opacity-100'}`}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg"
             >
-              {currentIndex === questions.length - 1 ? "Submit Quiz" : <>Next Question <ChevronRight className="ml-2 h-5 w-5" /></>}
+              {currentIndex === totalQuestions - 1
+                ? "Finish Quiz"
+                : "Next Question"}
+              <ChevronRight className="ml-2" />
             </Button>
-          </CardFooter>
-        </Card>
+          )}
+        </div>
       </div>
     </div>
   );
