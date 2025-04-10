@@ -10,10 +10,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface Data {
   id: string | number;
-  name: string;
-  email: string;
-  number: number | string;
-  pass: string;
+  Sname: string;
+  Semail: string;
+  Scontact: string;
+  Spass: string;
+  college_id: number;
 }
 
 export default function Page() {
@@ -68,29 +69,30 @@ export default function Page() {
     setLoading(true);
 
     const obj: Data = {
-      id: idRef.current?.value || "",
-      name: nameRef.current?.value || "",
-      email: emailRef.current?.value || "",
-      number: phoneRef.current?.value || "",
-      pass: passRef.current?.value || "",
+      id: Number(idRef.current?.value || ""),
+      Sname: nameRef.current?.value || "",
+      Spass: passRef.current?.value || "",
+      Semail: emailRef.current?.value || "",
+      Scontact: phoneRef.current?.value || "",
+      college_id: Number(collegeId),
     };
 
     if (
       obj.id &&
-      obj.name &&
-      obj.email &&
-      obj.number &&
-      obj.pass &&
-      collegeId
+      obj.Sname &&
+      obj.Semail &&
+      obj.Scontact &&
+      obj.Spass &&
+      obj.college_id
     ) {
       try {
         const response = await axios.post(
           "https://ai-teacher-api-xnd1.onrender.com/college/add_student/",
-          { ...obj, college_id: Number(collegeId) }
+          obj
         );
 
-        if (response.status === 200 && response.data.Message === "Success") {
-      //@ts-ignore
+        if (response.status === 200) {
+          //@ts-ignore
 
           toast.success("Student added successfully!");
 
@@ -101,13 +103,13 @@ export default function Page() {
           phoneRef.current!.value = "";
           setIdError(null);
         } else {
-      //@ts-ignore
+          //@ts-ignore
 
           toast.error("Failed to add student. Please check the data.");
         }
       } catch (err) {
         console.error(err);
-      //@ts-ignore
+        //@ts-ignore
 
         toast.error("Something went wrong.");
       } finally {
