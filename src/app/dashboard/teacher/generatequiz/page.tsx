@@ -186,7 +186,7 @@ export default function GenerateQuiz() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-black p-4 rounded-lg shadow-md"
+                className="bg-white p-4 rounded-lg shadow-md"
               >
                 <h3 className="font-semibold text-xl text-black">
                   {i + 1}. {q.question}
