@@ -7,6 +7,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckCircle, ChevronRight, Loader2, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
+import axios from "axios";
 
 type Question = {
   id: number;
@@ -23,20 +25,47 @@ export default function SolveQuiz() {
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
   const [answered, setAnswered] = useState<number[]>([]);
+  const [language, setLanguage] = useState<string>("english");
+
+  const languages = [
+    "punjabi", 
+    "english", 
+    "hindi", 
+    "bengali", 
+    "marathi", 
+    "telugu", 
+    "tamil", 
+    "gujarati", 
+    "urdu", 
+    "kannada", 
+    "odia", 
+    "malayalam"
+  ];
+  
 
   useEffect(() => {
+    const studentId = sessionStorage.getItem("studentId");
+
+    if (!studentId) {
+      console.error("Student ID not found in sessionStorage.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    fetch("/api/quiz") // Replace with your actual API endpoint
-      .then(res => res.json())
-      .then(data => {
-        setQuestions(data);
+
+    axios
+      .get(`https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/get_quiz/${language}`)
+      .then((res) => {
+        // Access quiz data from res.data[0].quiz
+        setQuestions(res.data[0].quiz); // This assumes that the quiz data is in the first item of the array
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to load quiz:", err);
         setLoading(false);
       });
-  }, []);
+  }, [language]);
 
   const handleNext = () => {
     if (selected === questions[currentIndex].answer) {
@@ -92,7 +121,7 @@ export default function SolveQuiz() {
     const percentage = Math.round((score / questions.length) * 100);
     let message = "Great effort!";
     let textColor = "text-yellow-500";
-    
+
     if (percentage >= 80) {
       message = "Outstanding!";
       textColor = "text-green-500";
@@ -112,7 +141,7 @@ export default function SolveQuiz() {
               <Trophy className="h-16 w-16 mx-auto text-yellow-400 mb-2" />
               <h3 className={`text-2xl font-bold ${textColor} mb-2`}>{message}</h3>
             </div>
-            
+
             <div className="p-6 bg-gray-50 rounded-lg mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600 font-medium">Your Score</span>
@@ -134,71 +163,82 @@ export default function SolveQuiz() {
 
   return (
     <div className="w-full flex flex-col justify-center items-center">
-
-    <div className="max-w-[600px] w-full justify-center p-4 my-8">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-500">
-            Progress: {answered.length} of {questions.length} questions answered
-          </span>
-          <span className="text-sm font-medium">
-            Score: {score}
-          </span>
-        </div>
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
-
-      <Card className="mb-6 shadow-md overflow-hidden border-t-4 border-primary">
-        <CardHeader className="bg-gray-50 pb-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-500">Question {currentIndex + 1} of {questions.length}</span>
-            {score > 0 && <span className="text-sm font-medium text-green-600 flex items-center"><CheckCircle className="h-4 w-4 mr-1" /> {score} correct</span>}
+      <div className="max-w-[600px] w-full justify-center p-4 my-8">
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-500">
+              Progress: {answered.length} of {questions.length} questions answered
+            </span>
+            <span className="text-sm font-medium">
+              Score: {score}
+            </span>
           </div>
-          <CardTitle className="text-xl font-bold mt-2">{currentQuestion.question}</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <RadioGroup
-            value={selected || ""}
-            onValueChange={setSelected}
-            className="space-y-4"
-          >
-            {currentQuestion.options.map((option, idx) => (
-              <div 
-                key={idx} 
-                className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all ${
-                  selected === option 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <RadioGroupItem value={option} id={`option-${idx}`} className="h-5 w-5" />
-                <Label htmlFor={`option-${idx}`} className="flex-grow text-lg cursor-pointer">
-                  {option}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </CardContent>
-        <CardFooter className="pt-4 pb-6">
-          <Button
-            onClick={handleNext}
-            disabled={!selected}
-            className={`w-full py-6 text-lg font-medium flex items-center justify-center ${
-              !selected ? 'opacity-70' : 'opacity-100'
-            }`}
-          >
-            {currentIndex === questions.length - 1 ? (
-              "Submit Quiz"
-            ) : (
-              <>
-                Next Question <ChevronRight className="ml-2 h-5 w-5" />
-              </>
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-    </div>
+          <Progress value={progressPercentage} className="h-2" />
+        </div>
 
+        <div className="mb-6">
+          <Label htmlFor="language" className="text-sm font-medium text-gray-500 mb-2">
+            Select Language
+          </Label>
+          <Select
+            value={language}
+            onValueChange={(value) => setLanguage(value)}
+          >
+            <SelectTrigger className="w-full p-3 border-2 rounded-md">
+              <span>{language.charAt(0).toUpperCase() + language.slice(1)}</span>
+            </SelectTrigger>
+            <SelectContent>
+              {languages.map((lang, index) => (
+                <SelectItem key={`${lang}`} value={lang}>
+                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Card className="mb-6 shadow-md overflow-hidden border-t-4 border-primary">
+          <CardHeader className="bg-gray-50 pb-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-500">Question {currentIndex + 1} of {questions.length}</span>
+              {score > 0 && <span className="text-sm font-medium text-green-600 flex items-center"><CheckCircle className="h-4 w-4 mr-1" /> {score} correct</span>}
+            </div>
+            <CardTitle className="text-xl font-bold mt-2">{currentQuestion.question}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <RadioGroup
+              value={selected || ""}
+              onValueChange={setSelected}
+              className="space-y-4"
+            >
+              {currentQuestion.options.map((option, idx) => (
+                <div
+                  key={`${currentQuestion.id}-${option}`} // Ensuring unique keys
+                  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all ${
+                    selected === option
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <RadioGroupItem value={option} id={`option-${idx}`} className="h-5 w-5" />
+                  <Label htmlFor={`option-${idx}`} className="flex-grow text-lg cursor-pointer">
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </CardContent>
+          <CardFooter className="pt-4 pb-6">
+            <Button
+              onClick={handleNext}
+              disabled={!selected}
+              className={`w-full py-6 text-lg font-medium flex items-center justify-center ${!selected ? 'opacity-70' : 'opacity-100'}`}
+            >
+              {currentIndex === questions.length - 1 ? "Submit Quiz" : <>Next Question <ChevronRight className="ml-2 h-5 w-5" /></>}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   );
 }

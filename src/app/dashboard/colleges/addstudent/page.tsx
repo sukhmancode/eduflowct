@@ -43,6 +43,7 @@ export default function Page() {
       const ids = studentList.map((student: any) => student.id);
       setExistingIds(ids);
     } catch {
+      //@ts-ignore
       toast.error("Error fetching college or student details.");
     }
   };
@@ -97,6 +98,8 @@ export default function Page() {
         );
 
         if (response.status === 200 && response.data.Message === "Success") {
+      //@ts-ignore
+
           toast.success("Student added successfully!");
 
           idRef.current.value = "";
@@ -106,15 +109,21 @@ export default function Page() {
           pnumber.current.value = "";
           setIdError(null);
         } else {
+      //@ts-ignore
+
           toast.error("Failed to add student. Please check the data.");
         }
       } catch (err) {
         console.error(err);
+      //@ts-ignore
+
         toast.error("Something went wrong.");
       } finally {
         setloading(false);
       }
     } else {
+      //@ts-ignore
+
       toast.error("Please fill all fields.");
       setloading(false);
     }
