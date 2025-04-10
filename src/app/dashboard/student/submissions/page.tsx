@@ -135,7 +135,7 @@ export default function Submissions() {
         );
         finalFeedback = data.FeedBack || "No feedback available.";
       }
-
+//@ts-ignore
       setOriginalFeedback((prev) => ({
         ...prev,
         [sub_id]: finalFeedback,
@@ -155,7 +155,7 @@ export default function Submissions() {
         ...prev,
         [sub_id]: "hi",
       }));
-
+//@ts-ignore
       translateFeedback(sub_id, finalFeedback, "hi");
     } catch (err) {
       console.error("Error fetching feedback", err);
