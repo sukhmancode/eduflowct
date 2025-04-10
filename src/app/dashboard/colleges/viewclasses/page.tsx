@@ -62,11 +62,20 @@ export default function page() {
             <div className="flex flex-wrap p-5 gap-3">
               {classes?.map((data, index) => {
                 return (
-                  <div className="card-container" key={index}>
-                    <div className="card-secondary-heading">
-                      Class Id: {data.id}
+                  <div className="relative group overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]">
+                    <div className="absolute inset-0">
+                      <div className="absolute w-1/3 h-full bg-white/10 blur-md transform translate-x-full group-hover:animate-shimmer pointer-events-none" />
                     </div>
-                    <div className="card-number">Class Name: {data.Cname}</div>
+
+                    <div className="relative z-10">
+                      <p className="text-sm text-gray-300 mb-2">
+                        {" "}
+                        Class Id: {data.id}
+                      </p>
+                      <p className="text-2xl font-bold">
+                        Class Name: {data.Cname}
+                      </p>
+                    </div>
                   </div>
                 );
               })}

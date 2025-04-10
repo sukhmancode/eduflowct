@@ -8,6 +8,8 @@ import "../styles/index.scss";
 import "../styles/addteacher.scss";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Page() {
   const [collegeId, setCollegeId] = useState<string | null>(null);
@@ -47,22 +49,22 @@ export default function Page() {
       collegeId
     ) {
       const payload = {
-        id: parseInt(idRef.current.value),
+        id: Number(idRef.current.value),
         Tname: nameRef.current.value,
+        Tpass: passRef.current.value,
+        college_id: Number(collegeId),
         Temail: emailRef.current.value,
         Tcontact: phoneRef.current.value,
-        Tpass: passRef.current.value,
-        college_id: parseInt(collegeId),
       };
-
+      console.log(payload, payload.college_id);
       try {
         const response = await axios.post(
           "https://ai-teacher-api-xnd1.onrender.com/college/add_teacher/",
           payload
         );
 
-        if (response.status === 200 && response.data.Message === "Success") {
-          alert("Teacher added successfully!");
+        if (response.status === 200) {
+          toast.success("Teacher Added Sucessfully!");
 
           // Clear inputs
           idRef.current.value = "";
@@ -75,12 +77,12 @@ export default function Page() {
         }
       } catch (err) {
         console.error(err);
-        alert("Something went wrong.");
+        toast.error("Something went wrong.");
       } finally {
         setLoading(false);
       }
     } else {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       setLoading(false);
     }
   };

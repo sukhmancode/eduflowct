@@ -65,7 +65,7 @@ export default function page() {
             <h2 className="welcome-message ">Welcome, {collegeName}</h2>
             <div className="cards">
               <Card
-                secondaryHeading="Total Number of Students "
+                secondaryHeading="Total Number of Classes"
                 number={classes}
                 secondary=" Classes"
               />

@@ -64,7 +64,7 @@ export default function Page() {
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="view-classes-content-container p-5">
+        <div className="view-classes-content-container p-5 md:pl-[300px]">
           <h2 className="welcome-message text-2xl font-bold mb-4">
             Welcome, {collegeName}
           </h2>

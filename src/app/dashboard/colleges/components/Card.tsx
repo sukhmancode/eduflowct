@@ -1,5 +1,4 @@
 import React from "react";
-import "../styles/card.scss";
 import Link from "next/link";
 
 interface Props {
@@ -8,6 +7,7 @@ interface Props {
   secondary?: string;
   href?: string;
 }
+
 export default function Card({
   secondaryHeading,
   number,
@@ -15,21 +15,27 @@ export default function Card({
   href,
 }: Props) {
   return (
-    <>
-      <div className="card-container">
-        <p className="card-secondary-heading">{secondaryHeading}</p>
-        <p className="card-number ">
-          <span>{number}</span>
-          <span>{secondary}</span>
+    <div className="relative group overflow-hidden p-6 rounded-xl bg-[#1e293b] text-white shadow-md hover:shadow-xl transition-all duration-300 w-full max-w-[400px]">
+      {/* Shimmer element on hover */}
+      <div className="absolute inset-0">
+        <div className="absolute w-1/3 h-full bg-white/10 blur-md transform translate-x-full group-hover:animate-shimmer pointer-events-none" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        <p className="text-sm text-gray-300 mb-2">{secondaryHeading}</p>
+        <p className="text-2xl font-bold">
+          {number} <span>{secondary}</span>
         </p>
-        {href ? (
+
+        {href && (
           <Link href={href}>
-            <button className="view-details"> View Details </button>
+            <button className="mt-4 px-4 py-2 bg-white text-gray-800 rounded-md font-semibold transition hover:shadow-lg">
+              View Details
+            </button>
           </Link>
-        ) : (
-          ""
         )}
       </div>
-    </>
+    </div>
   );
 }
