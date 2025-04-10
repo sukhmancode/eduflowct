@@ -1,16 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
-import "../styles/index.scss";
-
 import axios from "axios";
-import "../styles/card.scss";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-export interface Teacher {
+export interface Student {
   Scontact: string;
   Semail: string;
   Sname: string;
@@ -22,37 +18,40 @@ export interface Teacher {
 export default function Page() {
   const [collegeid, setCollegeId] = useState<string | null>(null);
   const [collegeName, setCollegeName] = useState<string>("");
-  const teacherRef = useRef<HTMLInputElement>(null);
-  const [teacherData, setTeacherData] = useState<Teacher | null>(null);
+  const studentRef = useRef<HTMLInputElement>(null);
+  const [studentData, setStudentData] = useState<Student | null>(null);
 
   const handleCollegeDetails = (collegeid: string) => {
-    const url1 = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/details`;
+    const url = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/details`;
     axios
-      .get(url1)
+      .get(url)
       .then(({ data }) => {
-        console.log(data);
         setCollegeName(data.Colname);
       })
       .catch(() => {
-        console.log("error fetching college details");
+        console.log("Error fetching college details");
       });
   };
 
-  const handleSearch = (e: any) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (teacherRef.current && collegeid) {
-      const URL = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/search_student/${teacherRef.current.value}?College_id=${collegeid}`;
-      axios.get(URL).then(({ data }) => {
-        console.log(data);
-        setTeacherData(data[0]);
-      });
+    if (studentRef.current && collegeid) {
+      const URL = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/search_student/${studentRef.current.value}?College_id=${collegeid}`;
+      axios
+        .get(URL)
+        .then(({ data }) => {
+          setStudentData(data[0] || null);
+        })
+        .catch(() => {
+          setStudentData(null);
+        });
     }
   };
 
   useEffect(() => {
-    const collegeIdFromStorage = sessionStorage.getItem("collegeId");
-    setCollegeId(collegeIdFromStorage);
-    if (collegeIdFromStorage) handleCollegeDetails(collegeIdFromStorage);
+    const storedId = sessionStorage.getItem("collegeId");
+    setCollegeId(storedId);
+    if (storedId) handleCollegeDetails(storedId);
   }, []);
 
   return (
@@ -60,101 +59,82 @@ export default function Page() {
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="view-classes-content-container p-5 min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100">
-          <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
-            <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
-          </div>
-          <div className="flex flex-col items-center gap-5">
-            <form
-              className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md"
-              onSubmit={handleSearch}
+
+        <div className="p-6 min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 space-y-6">
+          {/* Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">
+                Welcome, {collegeName || "Loading..."}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Search and view student details by ID below.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Search Form */}
+          <form
+            className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl mx-auto"
+            onSubmit={handleSearch}
+          >
+            <input
+              type="number"
+              placeholder="Enter Student ID"
+              ref={studentRef}
+              className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-black text-white rounded-full font-semibold hover:bg-neutral-800 transition"
             >
-              <input
-                type="number"
-                placeholder="Search Any Teacher Id:"
-                style={{
-                  border: "1px solid grey",
-                  width: "100%",
-                  borderRadius: 20,
-                  padding: 5,
-                }}
-                ref={teacherRef}
-              />
-              <input
-                type="submit"
-                value="Search"
-                style={{
-                  background: "black",
-                  borderRadius: 20,
-                  color: "white",
-                  padding: "5px 10px",
-                }}
-              />
-            </form>
-            {teacherData ? (
-              <div className="teacher-details mt-5 w-full max-w-lg">
-                <table className="min-w-full border-collapse border border-gray-400">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="border border-gray-300 px-4 py-2">
-                        Field
-                      </th>
-                      <th className="border border-gray-300 px-4 py-2">
-                        Value
-                      </th>
-                    </tr>
-                  </thead>
+              Search
+            </button>
+          </form>
+
+          {/* Student Details */}
+          <div className="max-w-2xl mx-auto">
+            {studentData ? (
+              <Card className="bg-[#1e293b] text-white shadow-md rounded-xl p-6 mt-6">
+                <h3 className="text-xl font-bold mb-4">Student Details</h3>
+                <table className="min-w-full border-collapse text-sm">
                   <tbody>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">Name</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Sname}
-                      </td>
+                      <td className="font-semibold py-1">🆔 Student ID:</td>
+                      <td className="py-1">{studentData.id}</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Email
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Semail}
-                      </td>
+                      <td className="font-semibold py-1">📛 Name:</td>
+                      <td className="py-1">{studentData.Sname}</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Contact
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Scontact}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        College ID
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.college_id}
-                      </td>
+                      <td className="font-semibold py-1">📧 Email:</td>
+                      <td className="py-1">{studentData.Semail}</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Student ID
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.id}
-                      </td>
+                      <td className="font-semibold py-1">📞 Contact:</td>
+                      <td className="py-1">{studentData.Scontact}</td>
+                    </tr>
+                    <tr>
+                      <td className="font-semibold py-1">🏫 College ID:</td>
+                      <td className="py-1">{studentData.college_id}</td>
                     </tr>
                   </tbody>
                 </table>
-              </div>
+              </Card>
             ) : (
-              <div className="mt-5 text-gray-500">
-                No teacher details to display. Please search for a teacher.
-              </div>
+              <p className="text-center text-gray-500 mt-6">
+                {studentRef.current?.value
+                  ? "No student found with that ID."
+                  : "Please enter a student ID to begin search."}
+              </p>
             )}
           </div>
         </div>

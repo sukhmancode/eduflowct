@@ -1,14 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import Sidebar from "../components/Sidebar";
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
-import "../styles/index.scss";
-
 import axios from "axios";
-import "../styles/card.scss";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface Teacher {
   Tcontact: string;
@@ -21,149 +18,131 @@ export interface Teacher {
 }
 
 export default function Page() {
-  const [collegeid, setCollegeId] = useState<string | null>(null);
+  const [collegeId, setCollegeId] = useState<string | null>(null);
   const [collegeName, setCollegeName] = useState<string>("");
-  const teacherRef = useRef<HTMLInputElement>(null);
   const [teacherData, setTeacherData] = useState<Teacher | null>(null);
-
-  const handleCollegeDetails = (collegeid: string) => {
-    const url1 = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/details`;
-    axios
-      .get(url1)
-      .then(({ data }) => {
-        console.log(data);
-        setCollegeName(data.Colname);
-      })
-      .catch(() => {
-        console.log("error fetching college details");
-      });
-  };
-
-  const handleSearch = (e: any) => {
-    e.preventDefault();
-    if (teacherRef.current && collegeid) {
-      const URL = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeid}/search_teacher/${teacherRef.current.value}?College_id=${collegeid}`;
-      axios.get(URL).then(({ data }) => {
-        console.log(data);
-        // Assumes API returns an array, taking first element as teacher data
-        setTeacherData(data[0]);
-      });
-    }
-  };
+  const teacherRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const collegeIdFromStorage = sessionStorage.getItem("collegeId");
-    setCollegeId(collegeIdFromStorage);
-    if (collegeIdFromStorage) handleCollegeDetails(collegeIdFromStorage);
+    const storedId = sessionStorage.getItem("collegeId");
+    setCollegeId(storedId);
+
+    if (storedId) {
+      axios
+        .get(
+          `https://ai-teacher-api-xnd1.onrender.com/college/${storedId}/details`
+        )
+        .then(({ data }) => setCollegeName(data.Colname))
+        .catch(() => console.error("Error fetching college details"));
+    }
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (teacherRef.current && collegeId) {
+      const URL = `https://ai-teacher-api-xnd1.onrender.com/college/${collegeId}/search_teacher/${teacherRef.current.value}?College_id=${collegeId}`;
+      axios
+        .get(URL)
+        .then(({ data }) => {
+          setTeacherData(data[0] || null);
+        })
+        .catch(() => {
+          setTeacherData(null);
+        });
+    }
+  };
 
   return (
     <div className="add-teacher-container flex">
       <div className="sidebar-container-page">
         <Sidebar />
       </div>
+
       <div className="content-container w-full">
         <div className="navbar">
           <Navbar />
         </div>
-        <div className="view-classes-content-container p-5 md:pl-[300px]">
-          <div className="max-w-xl  bg-white shadow-md rounded-xl p-6 mb-6 mt-1">
-            <h2 className="text-2xl font-bold ">Welcome, {collegeName}</h2>
-          </div>
-          <div className="flex flex-col items-center gap-5">
-            <form
-              className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md"
-              onSubmit={handleSearch}
+
+        <div className="view-classes-content-container min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome, {collegeName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">Search for a teacher by ID below.</p>
+            </CardContent>
+          </Card>
+
+          {/* Search Form */}
+          <form
+            onSubmit={handleSearch}
+            className="flex flex-col sm:flex-row gap-4 items-center justify-center max-w-xl mx-auto"
+          >
+            <input
+              type="number"
+              ref={teacherRef}
+              placeholder="Enter Teacher ID"
+              className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-black text-white rounded-full font-semibold hover:bg-neutral-800 transition"
             >
-              <input
-                type="number"
-                placeholder="Search Any Teacher Id:"
-                style={{
-                  border: "1px solid grey",
-                  width: "100%",
-                  borderRadius: 20,
-                  padding: 5,
-                }}
-                ref={teacherRef}
-              />
-              <input
-                type="submit"
-                value="Search"
-                style={{
-                  background: "black",
-                  borderRadius: 20,
-                  color: "white",
-                  padding: "5px 10px",
-                }}
-              />
-            </form>
+              Search
+            </button>
+          </form>
+
+          {/* Teacher Info - Dark Card */}
+          <div className="max-w-2xl mx-auto">
             {teacherData ? (
-              <div className="teacher-details mt-5 w-full max-w-lg">
-                <table className="min-w-full border-collapse border border-gray-400">
-                  <thead>
-                    <tr className="bg-gray-200">
-                      <th className="border border-gray-300 px-4 py-2">
-                        Field
-                      </th>
-                      <th className="border border-gray-300 px-4 py-2">
-                        Value
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">Name</td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Tname}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Email
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Temail}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Contact
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.Tcontact}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Subject
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.subject}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        College ID
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.college_id}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Teacher ID
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {teacherData.id}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <Card className="bg-[#1e293b] text-white shadow-md rounded-xl p-6 mt-6">
+                <h3 className="text-xl font-bold mb-4">Teacher Details</h3>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      🆔 Teacher ID:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.id}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      📛 Name:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.Tname}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      📧 Email:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.Temail}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      📞 Contact:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.Tcontact}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      📚 Subject:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.subject}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-300 font-semibold">
+                      🏫 College ID:
+                    </span>{" "}
+                    <span className="ml-2">{teacherData.college_id}</span>
+                  </div>
+                </div>
+              </Card>
             ) : (
-              <div className="mt-5 text-gray-500">
-                No teacher details to display. Please search for a teacher.
-              </div>
+              <p className="text-center text-gray-500 mt-6">
+                {teacherRef.current?.value
+                  ? "No teacher found with that ID."
+                  : "Please enter a teacher ID to begin search."}
+              </p>
             )}
           </div>
         </div>
