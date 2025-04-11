@@ -35,7 +35,7 @@ export default function ResourceGenerator() {
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-6 text-purple-700">
-        Resource Generator
+        Resource
       </h1>
 
       {/* Search Bar */}
