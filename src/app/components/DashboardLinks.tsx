@@ -27,11 +27,7 @@ export const studentLinks: NavProps[] = [
     name: "View Profile",
     href: "/dashboard/student/profile",
   },
-  {
-    id: 2,
-    name: "Reports",
-    href: "/dashboard/student/reports",
-  },
+
   {
     id: 3,
     name: "ChatBot",
