@@ -36,24 +36,16 @@ interface Language {
 
 export default function Submissions() {
   const [studentId, setStudentId] = useState<string | null>(null);
-  const [studentName, setStudentName] = useState<string>(""); // ✅
+  const [studentName, setStudentName] = useState<string>("");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [feedbackState, setFeedbackState] = useState<{
-    [sub_id: number]: string;
-  }>({});
-  const [originalFeedback, setOriginalFeedback] = useState<{
-    [sub_id: number]: string;
-  }>({});
+  const [feedbackState, setFeedbackState] = useState<{ [sub_id: number]: string }>({});
+  const [originalFeedback, setOriginalFeedback] = useState<{ [sub_id: number]: string }>({});
   const [visible, setVisible] = useState<{ [sub_id: number]: boolean }>({});
   const [typing, setTyping] = useState<number | null>(null);
-  const [translating, setTranslating] = useState<{ [sub_id: number]: boolean }>(
-    {}
-  );
-  const [selectedLanguage, setSelectedLanguage] = useState<{
-    [sub_id: number]: string;
-  }>({});
+  const [translating, setTranslating] = useState<{ [sub_id: number]: boolean }>({});
+  const [selectedLanguage, setSelectedLanguage] = useState<{ [sub_id: number]: string }>({});
 
   const languages: Language[] = [
     { code: "en", name: "English" },
@@ -76,19 +68,13 @@ export default function Submissions() {
     const fetchData = async () => {
       try {
         const [subsRes, assignRes, detailRes] = await Promise.all([
-          axios.get(
-            `https://ai-teacher-api-xnd1.onrender.com/student/submissions/${id}`
-          ),
-          axios.get(
-            `https://ai-teacher-api-xnd1.onrender.com/student/assignments/${id}`
-          ),
-          axios.get(
-            `https://ai-teacher-api-xnd1.onrender.com/student/${id}/details`
-          ),
+          axios.get(`https://ai-teacher-api-xnd1.onrender.com/student/submissions/${id}`),
+          axios.get(`https://ai-teacher-api-xnd1.onrender.com/student/assignments/${id}`),
+          axios.get(`https://ai-teacher-api-xnd1.onrender.com/student/${id}/details`),
         ]);
         setSubmissions(subsRes.data);
         setAssignments(assignRes.data);
-        setStudentName(detailRes.data.Sname); // ✅ set name
+        setStudentName(detailRes.data.Sname);
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -126,7 +112,6 @@ export default function Submissions() {
 
     try {
       setTyping(sub_id);
-
       let finalFeedback = feedback;
 
       if (!feedback) {
@@ -135,9 +120,7 @@ export default function Submissions() {
         );
         finalFeedback = data.FeedBack || "No feedback available.";
       }
-
-//@ts-ignore
-
+      //@ts-ignore
       setOriginalFeedback((prev) => ({
         ...prev,
         [sub_id]: finalFeedback,
@@ -157,9 +140,7 @@ export default function Submissions() {
         ...prev,
         [sub_id]: "hi",
       }));
-
-//@ts-ignore
-
+      //@ts-ignore
 
       translateFeedback(sub_id, finalFeedback, "hi");
     } catch (err) {
@@ -185,20 +166,19 @@ export default function Submissions() {
         return;
       }
 
-      const mockTranslated = await mockTranslate(text, targetLang);
+      const { data } = await axios.get(
+        `https://ai-teacher-api-xnd1.onrender.com/student/FeedBack/${sub_id}/${targetLang}`
+      );
+
+      const translated = data[0]?.feedback || "Translation not available.";
       setFeedbackState((prev) => ({ ...prev, [sub_id]: "" }));
-      typeFeedback(sub_id, mockTranslated);
+      typeFeedback(sub_id, translated);
       setSelectedLanguage((prev) => ({ ...prev, [sub_id]: targetLang }));
     } catch (err) {
       console.error("Translation error", err);
     } finally {
       setTranslating((prev) => ({ ...prev, [sub_id]: false }));
     }
-  };
-
-  const mockTranslate = async (text: string, lang: string): Promise<string> => {
-    await new Promise((res) => setTimeout(res, 500));
-    return `[${languages.find((l) => l.code === lang)?.name}] ${text}`;
   };
 
   const getAssignmentTitle = (assignmentId: number) => {
@@ -215,8 +195,7 @@ export default function Submissions() {
 
   return (
     <div className="flex flex-wrap justify-center mt-8 px-4">
-      <div className="w-full  space-y-6">
-        {/* ✅ Welcome Card */}
+      <div className="w-full space-y-6">
         {studentName && (
           <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
             <CardHeader>
@@ -230,7 +209,6 @@ export default function Submissions() {
           </Card>
         )}
         <div className="flex flex-wrap gap-[10px]">
-          {/* ✅ Submissions */}
           {submissions.map((submission) => (
             <Card
               key={submission.sub_id}
