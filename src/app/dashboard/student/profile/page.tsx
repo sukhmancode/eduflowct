@@ -20,34 +20,49 @@ interface Student {
   Spass?: string;
 }
 
+interface Teacher {
+  id: number;
+  Tname: string;
+  Temail: string;
+}
+
 export default function Profile() {
   const [student, setStudent] = useState<Student | null>(null);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const studentId = sessionStorage.getItem("studentId");
 
     if (!studentId) {
+        //@ts-ignore
+
       toast.error("No student ID found in session.");
       setLoading(false);
       return;
     }
 
-    const fetchStudent = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get<Student>(
+        const studentRes = await axios.get<Student>(
           `https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/details`
         );
-        setStudent(res.data);
+        setStudent(studentRes.data);
+
+        const teacherRes = await axios.get<Teacher[]>(
+          `https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/teachers`
+        );
+        setTeachers(teacherRes.data);
       } catch (error) {
         console.error(error);
-        toast.error("Failed to fetch student profile.");
+        //@ts-ignore
+        toast.error("Failed to fetch profile or teachers.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStudent();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -65,8 +80,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-[89vh]  bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
-      {/* ✅ Full Width Welcome Card */}
+    <div className="min-h-[89vh] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+      {/* Welcome Card */}
       <Card className="w-full shadow-lg border border-gray-800 bg-[#1e293b] text-white">
         <CardHeader>
           <CardTitle className="text-2xl">Welcome, {student.Sname}</CardTitle>
@@ -76,7 +91,7 @@ export default function Profile() {
         </CardHeader>
       </Card>
 
-      {/* ✅ Left-aligned Profile Card */}
+      {/* Profile Info Card */}
       <Card className="w-full max-w-xl shadow-lg border border-gray-800 bg-[#1e293b] text-white">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold">
@@ -99,6 +114,28 @@ export default function Profile() {
             <p className="text-sm text-gray-400">🏫 College ID</p>
             <p className="text-base font-medium">{student.college_id}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Assigned Teachers Card */}
+      <Card className="w-full max-w-xl shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold">Assigned Teachers</CardTitle>
+          <CardDescription className="text-gray-300">
+            These teachers are assigned to you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {teachers.length > 0 ? (
+            teachers.map((teacher) => (
+              <div key={teacher.id}>
+                <p className="text-base font-medium">👤 {teacher.Tname}</p>
+                <p className="text-sm text-gray-400">📧 {teacher.Temail}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400">No teachers assigned yet.</p>
+          )}
         </CardContent>
       </Card>
     </div>
