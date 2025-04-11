@@ -40,4 +40,8 @@ export const SideBarData: LinkArray[] = [
     href: "/dashboard/colleges/noticeposting",
     value: "Post Notice",
   },
+  {
+    href: "/dashboard/colleges/addcertificate",
+    value: "Add Certificate",
+  },
 ];

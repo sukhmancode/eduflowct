@@ -101,11 +101,7 @@ export const teacherLinks: NavProps[] = [
     name: "SendEmail",
     href: "/dashboard/teacher/sendemail",
   },
-  {
-    id: 7,
-    name: "Generate certificate",
-    href: "/dashboard/teacher/addcertificate",
-  },
+
 ];
 
 interface DashboardLinksProps {
