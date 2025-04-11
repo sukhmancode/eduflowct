@@ -1,20 +1,54 @@
 "use client";
-
-import { useState, useRef } from "react";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import Image from "next/image";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import "../styles/index.scss";
+import { DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import domToImage from "dom-to-image-more";
+import Image from "next/image";
 
-export default function CertificateGenerator() {
+export default function PostNotice() {
+  const router = useRouter();
+  const [collegeId, setCollegeId] = useState<string | null>(null);
+  const [collegeName, setCollegeName] = useState<string>("");
+  
+ 
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== "undefined") {
+      const id = sessionStorage.getItem("collegeId");
+      if (!id) {
+        // @ts-ignore
+        toast.error("College ID not found in session!");
+        router.push("/");
+      } else {
+        setCollegeId(id);
+        fetchCollegeName(id);
+      }
+    }
+  }, [router]);
+
+  const fetchCollegeName = async (id: string) => {
+    try {
+      const response = await fetch(
+        `https://ai-teacher-api-xnd1.onrender.com/college/${id}/details`
+      );
+      const data = await response.json();
+      setCollegeName(data.Colname);
+    } catch (err) {
+      console.error("Error fetching college name");
+    }
+  };
+
+  
   const [name, setName] = useState<string>("");
   const [rollNo, setRollNo] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -63,8 +97,32 @@ export default function CertificateGenerator() {
       setLoading(false);
     }
   };
-
   return (
+    <div className="add-teacher-container flex">
+      <div className="sidebar-container-page">
+        <Sidebar />
+      </div>
+
+      <div className="content-container w-full">
+        <div className="navbar">
+          <Navbar />
+        </div>
+
+        <div className="min-h-[89vh] md:pl-[300px] bg-gradient-to-br from-slate-50 via-slate-200 to-slate-100 p-6 space-y-6">
+          {/* Welcome Card */}
+          <Card className="shadow-lg border border-gray-800 bg-[#1e293b] text-white">
+            <CardHeader>
+              <CardTitle className="text-2xl">Welcome, {collegeName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-300">
+                Use this form to generate a new certificate  .
+              </p>
+            </CardContent>
+          </Card>
+        
+
+ 
     <div className="min-h-screen  flex flex-col  p-6">
       {/* Welcome Message */}
       <div className="w-full  bg-[#1e293b] text-white p-6 rounded-xl shadow-lg mb-6">
@@ -119,7 +177,7 @@ export default function CertificateGenerator() {
             style={{ color: "#000", backgroundColor: "#fff" }}
           >
             <Image
-              src="/gne.png" // Ensure this is in your public folder
+              src="/gne.png" 
               width={100}
               height={100}
               alt="GNE Logo"
@@ -148,6 +206,9 @@ export default function CertificateGenerator() {
           </Button>
         </DialogContent>
       </Dialog>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
