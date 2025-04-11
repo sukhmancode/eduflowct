@@ -38,7 +38,7 @@ export default function Chatbot() {
 
     try {
       const { data } = await axios.post(
-        "https://ai-teacher-api-xnd1.onrender.com/teacher/chatbot", // Updated API endpoint
+        "https://ai-teacher-api-xnd1.onrender.com/student/chatbot", // Updated API endpoint
         {
           query_text: message,
         }
