@@ -126,7 +126,7 @@ export default function LandingPage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
               <div className="flex items-center justify-center">
                 <Image
-                  src="/dashboard-image.jpg"
+                  src="/dashboard-main.png"
                   alt="Students using the platform"
                   width={750}
                   height={750}
