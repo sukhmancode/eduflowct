@@ -26,9 +26,12 @@ export function CollegeLogin() {
 
       if (response.data.Message === "Success Login") {
         sessionStorage.setItem("collegeId", response.data.ID);
+        //@ts-ignore
         toast.success("College Login Successful");
         window.location.href = "/dashboard/colleges"; 
       } else {
+        //@ts-ignore
+
         toast.error("Please check your credentials");
       }
     } catch (err) {

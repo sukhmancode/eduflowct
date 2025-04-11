@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "sonner";
+import { //@ts-ignore 
+    toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -66,10 +67,8 @@ export default function FancyQuiz() {
       const data = res.data[0]?.quiz || [];
 
       if (!data.length && language !== "english") {
-        // @ts-ignore
-        toast.error(
-          `Failed to load quiz in ${language}. Falling back to English.`
-        );
+        //@ts-ignore 
+        toast.error(`Failed to load quiz in ${language}. Falling back to English.`);
         setLanguage("english");
         return;
       }
@@ -81,7 +80,7 @@ export default function FancyQuiz() {
       setShowResult(false);
       setSubmitted(false);
     } catch {
-      // @ts-ignore
+      //@ts-ignore 
       toast.error("Error fetching quiz. Please try again.");
       setQuestions([]);
     } finally {
@@ -93,13 +92,11 @@ export default function FancyQuiz() {
     if (studentId) fetchQuiz();
   }, [language]);
 
-  // 🔐 Prevent fullscreen exit
   useEffect(() => {
     const handleFullscreenExit = () => {
       if (started && !showResult && !document.fullscreenElement) {
-        // @ts-ignore
+        //@ts-ignore 
         toast.error("You can't exit fullscreen until the quiz is complete.");
-
         setTimeout(() => {
           if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(() => {});
@@ -107,30 +104,28 @@ export default function FancyQuiz() {
         }, 300);
       }
     };
-
     document.addEventListener("fullscreenchange", handleFullscreenExit);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenExit);
   }, [started, showResult]);
+
   useEffect(() => {
     const preventEscapeKey = (e: KeyboardEvent) => {
       if (started && !showResult && e.key === "Escape") {
         setTimeout(() => {
           document.documentElement.requestFullscreen().catch(() => {});
         }, 100);
-        // @ts-ignore
+        //@ts-ignore 
         toast.error("Escape is disabled during the quiz.");
       }
     };
 
     document.addEventListener("keydown", preventEscapeKey);
-
     return () => {
       document.removeEventListener("keydown", preventEscapeKey);
     };
   }, [started, showResult]);
 
-  // 🛡 Prevent page reload
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (started && !showResult) {
@@ -141,7 +136,6 @@ export default function FancyQuiz() {
     return () => window.removeEventListener("beforeunload", beforeUnload);
   }, [started, showResult]);
 
-  // ⏲ Timer logic
   useEffect(() => {
     if (!started || submitted || showResult || loading) return;
     if (timeLeft === 0) {
@@ -170,7 +164,7 @@ export default function FancyQuiz() {
     setSubmitted(true);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setSubmitted(false);
     setSelected(null);
     if (currentIndex < questions.length - 1) {
@@ -178,6 +172,16 @@ export default function FancyQuiz() {
     } else {
       setShowResult(true);
       document.exitFullscreen().catch(() => {});
+      try {
+        await axios.patch(
+          `https://ai-teacher-api-xnd1.onrender.com/student/${studentId}/post_quiz/${score}`
+        );
+        //@ts-ignore 
+        toast.success("Your quiz score was submitted successfully!");
+      } catch {
+        //@ts-ignore 
+        toast.error("Failed to submit your score.");
+      }
     }
   };
 
@@ -192,7 +196,6 @@ export default function FancyQuiz() {
     document.documentElement.requestFullscreen().catch(() => {});
   };
 
-  // 🚀 UI Rendering
   if (!started) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
@@ -202,8 +205,7 @@ export default function FancyQuiz() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-300 mb-4">
-              Click start to begin the quiz. Fullscreen will be enabled and page
-              reload will be blocked.
+              Click start to begin the quiz. Fullscreen will be enabled and page reload will be blocked.
             </p>
             <Button
               onClick={handleStart}
@@ -234,8 +236,7 @@ export default function FancyQuiz() {
           <Trophy className="mx-auto w-16 h-16 text-yellow-400 mb-4" />
           <h2 className="text-3xl font-bold mb-2">Quiz Completed!</h2>
           <p className="text-lg text-gray-600 mb-6">
-            You scored <strong>{score}</strong> out of{" "}
-            <strong>{totalQuestions}</strong>
+            You scored <strong>{score}</strong> out of <strong>{totalQuestions}</strong>
           </p>
           <Progress value={percentage} className="h-3 mb-4" />
           <p className="text-xl font-semibold text-purple-700 mb-4">
@@ -261,19 +262,15 @@ export default function FancyQuiz() {
         </CardHeader>
         <CardContent>
           <p className="text-gray-300">
-            Test your knowledge. Each question has a 2-minute timer. Fullscreen
-            is enforced.
+            Test your knowledge. Each question has a 2-minute timer. Fullscreen is enforced.
           </p>
         </CardContent>
       </Card>
 
       <div className="max-w-5xl grid md:grid-cols-2 gap-4 mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
-        {/* Left */}
         <div className="bg-[#f6f8fe] px-10 py-12 flex flex-col justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-blue-600 mb-2">
-              EduQuiz
-            </h2>
+            <h2 className="text-xl font-semibold text-blue-600 mb-2">EduQuiz</h2>
             <p className="text-sm text-gray-500 mb-2">
               Question {currentIndex + 1} of {totalQuestions}
             </p>
@@ -286,9 +283,7 @@ export default function FancyQuiz() {
             </div>
           </div>
           <div className="mt-10">
-            <Label className="text-sm text-gray-500 mb-2 block">
-              Select Language
-            </Label>
+            <Label className="text-sm text-gray-500 mb-2 block">Select Language</Label>
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="w-full p-3 border bg-white rounded-md">
                 {language.charAt(0).toUpperCase() + language.slice(1)}
@@ -304,7 +299,6 @@ export default function FancyQuiz() {
           </div>
         </div>
 
-        {/* Right */}
         <div className="p-10 space-y-6">
           <RadioGroup
             value={selected ?? ""}
@@ -314,9 +308,7 @@ export default function FancyQuiz() {
             {currentQuestion?.options.map((option, idx) => {
               const isCorrect = submitted && option === currentQuestion.answer;
               const isWrong =
-                submitted &&
-                selected === option &&
-                option !== currentQuestion.answer;
+                submitted && selected === option && option !== currentQuestion.answer;
 
               return (
                 <div
@@ -361,9 +353,7 @@ export default function FancyQuiz() {
               onClick={handleNext}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl text-lg"
             >
-              {currentIndex === totalQuestions - 1
-                ? "Finish Quiz"
-                : "Next Question"}
+              {currentIndex === totalQuestions - 1 ? "Finish Quiz" : "Next Question"}
               <ChevronRight className="ml-2" />
             </Button>
           )}

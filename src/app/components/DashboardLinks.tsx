@@ -52,6 +52,11 @@ export const studentLinks: NavProps[] = [
     name: "Solve Quiz",
     href: "/dashboard/student/solvequiz",
   },
+  {
+    id: 7,
+    name: "Generate resources",
+    href: "/dashboard/student/resourcegenerator",
+  },
 ];
 
 // Teacher Links
