@@ -17,32 +17,32 @@ export const studentLinks: NavProps[] = [
     name: "Home",
     href: "/dashboard/student",
   },
-  // {
-  //   id: 0,
-  //   name: "View Submissions",
-  //   href: "/dashboard/student/submissions",
-  // },
-  // {
-  //   id: 1,
-  //   name: "View Profile",
-  //   href: "/dashboard/student/profile",
-  // },
+  {
+    id: 0,
+    name: "View Submissions",
+    href: "/dashboard/student/submissions",
+  },
+  {
+    id: 1,
+    name: "View Profile",
+    href: "/dashboard/student/profile",
+  },
 
   {
     id: 3,
     name: "ChatBot",
     href: "/dashboard/student/chatbot",
   },
-  // {
-  //   id: 4,
-  //   name: "View MST",
-  //   href: "/dashboard/student/viewmst",
-  // },
-  // {
-  //   id: 5,
-  //   name: "Calculate SGPA",
-  //   href: "/dashboard/student/sgpa",
-  // },
+  {
+    id: 4,
+    name: "View MST",
+    href: "/dashboard/student/viewmst",
+  },
+  {
+    id: 5,
+    name: "Calculate SGPA",
+    href: "/dashboard/student/sgpa",
+  },
   {
     id: 6,
     name: "Solve Quiz",
@@ -62,21 +62,21 @@ export const teacherLinks: NavProps[] = [
     name: "Home",
     href: "/dashboard/teacher",
   },
-  // {
-  //   id: 0,
-  //   name: "Upload Assignment",
-  //   href: "/dashboard/teacher/assignments",
-  // },
-  // {
-  //   id: 1,
-  //   name: "View Students",
-  //   href: "/dashboard/teacher/students",
-  // },
-  // {
-  //   id: 2,
-  //   name: "View Profile",
-  //   href: "/dashboard/teacher/profile",
-  // },
+  {
+    id: 0,
+    name: "Upload Assignment",
+    href: "/dashboard/teacher/assignments",
+  },
+  {
+    id: 1,
+    name: "View Students",
+    href: "/dashboard/teacher/students",
+  },
+  {
+    id: 2,
+    name: "View Profile",
+    href: "/dashboard/teacher/profile",
+  },
   {
     id: 3,
     name: "ChatBot",
@@ -87,16 +87,16 @@ export const teacherLinks: NavProps[] = [
     name: "Generate Quiz",
     href: "/dashboard/teacher/generatequiz",
   },
-  // {
-  //   id: 5,
-  //   name: "Upload Marks",
-  //   href: "/dashboard/teacher/uploadMarks",
-  // },
-  // {
-  //   id: 6,
-  //   name: "SendEmail",
-  //   href: "/dashboard/teacher/sendemail",
-  // },
+  {
+    id: 5,
+    name: "Upload Marks",
+    href: "/dashboard/teacher/uploadMarks",
+  },
+  {
+    id: 6,
+    name: "SendEmail",
+    href: "/dashboard/teacher/sendemail",
+  },
 
 ];
 
